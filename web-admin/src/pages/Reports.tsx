@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { reportsAPI } from "../services/api";
-import { Button, Card, Input, Select, Alert, LoadingSpinner } from "../components/ui";
+import { Button, Card, Input, Select, Alert } from "../components/ui";
 
 type ReportType = "orders" | "mlm" | "financial";
 

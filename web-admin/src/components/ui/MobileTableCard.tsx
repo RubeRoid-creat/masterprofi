@@ -1,8 +1,6 @@
 import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '../../utils/cn';
 import Card from './Card';
-import Badge from './Badge';
-import Button from './Button';
 
 export interface MobileTableCardProps extends HTMLAttributes<HTMLDivElement> {
   title?: string;

@@ -350,7 +350,7 @@ export default function MLM() {
                     </div>
                   </div>
                 )}
-              </div>
+              </Card>
             )}
 
             {/* Партнерская структура */}

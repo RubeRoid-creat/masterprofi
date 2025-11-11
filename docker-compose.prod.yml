@@ -55,6 +55,8 @@ services:
         condition: service_healthy
     networks:
       - masterprofi_network
+    ports:
+      - "3000:3000"
     restart: unless-stopped
 
   web-admin:

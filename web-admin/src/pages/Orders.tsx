@@ -916,6 +916,8 @@ export default function Orders() {
                 )}
               </TableBody>
             </Table>
+              </div>
+            </>
           )}
 
         {/* Пагинация (только для таблицы) */}

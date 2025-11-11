@@ -10,10 +10,9 @@ import Sidebar, { SidebarItem } from "./ui/Sidebar";
 
 interface LayoutProps {
   children: ReactNode;
-  currentPage?: string;
 }
 
-export default function Layout({ children, currentPage = "dashboard" }: LayoutProps) {
+export default function Layout({ children }: LayoutProps) {
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();

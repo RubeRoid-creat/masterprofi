@@ -3,6 +3,7 @@ import PaymentModal from "../components/PaymentModal";
 import Pagination from "../components/Pagination";
 import { paymentsAPI, usersAPI, ordersAPI } from "../services/api";
 import { useDataSync } from "../hooks/useDataSync";
+import { Button, Card, Badge, Input, Select, StatCard, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Alert, LoadingSpinner, MobileTableCard } from "../components/ui";
 
 interface Payment {
   id: string;
@@ -158,23 +159,6 @@ export default function Payments() {
     }
   };
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "processing":
-        return "bg-blue-100 text-blue-800";
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "failed":
-        return "bg-red-100 text-red-800";
-      case "refunded":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
   const getStatusLabel = (status: string) => {
     const labels: { [key: string]: string } = {
       pending: "Ожидание",
@@ -186,14 +170,6 @@ export default function Payments() {
     return labels[status] || status;
   };
 
-  const getTypeLabel = (type: string) => {
-    const labels: { [key: string]: string } = {
-      order_payment: "Оплата заказа",
-      commission: "Комиссия",
-      withdrawal: "Вывод",
-    };
-    return labels[type] || type;
-  };
 
   // Фильтрация платежей
   const filteredPayments = useMemo(() => {
@@ -285,255 +261,355 @@ export default function Payments() {
     }
   }, [filteredPayments]);
 
+  const getStatusBadgeVariant = (status: string): "primary" | "secondary" | "success" | "warning" | "error" | "info" | "gray" => {
+    switch (status) {
+      case "completed":
+        return "success";
+      case "processing":
+        return "primary";
+      case "pending":
+        return "warning";
+      case "failed":
+        return "error";
+      case "refunded":
+        return "info";
+      default:
+        return "gray";
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case "order_payment":
+        return "Оплата заказа";
+      case "commission":
+        return "Комиссия";
+      case "withdrawal":
+        return "Вывод";
+      default:
+        return type;
+    }
+  };
+
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="text-center py-12">
-            <p className="text-gray-600">Загрузка платежей...</p>
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="min-h-screen bg-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900">Платежи</h2>
-              <p className="text-gray-600 mt-2">
-                Все платежи в системе
-              </p>
-            </div>
-            <button
-              onClick={handleCreate}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
-              + Создать платеж
-            </button>
+    <div className="animate-fade-in">
+      <Card variant="elevated" padding="lg" className="animate-slide-up">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 font-display">Платежи</h2>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Все платежи в системе
+            </p>
+          </div>
+          <Button
+            variant="primary"
+            onClick={handleCreate}
+            leftIcon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            }
+          >
+            Создать платеж
+          </Button>
+        </div>
+
+        {/* Статистика */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 animate-fade-in">
+          <StatCard
+            title="Всего платежей"
+            value={filteredPayments.length}
+            variant="primary"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            }
+            className="animate-slide-up"
+            style={{ animationDelay: '0.1s' }}
+          />
+          <StatCard
+            title="Завершенных"
+            value={filteredPayments.filter((p) => p.status === "completed").length}
+            variant="success"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            }
+            className="animate-slide-up"
+            style={{ animationDelay: '0.2s' }}
+          />
+          <StatCard
+            title="Общая сумма"
+            value={(() => {
+              const num = typeof totalAmount === "number" && !isNaN(totalAmount) 
+                ? totalAmount 
+                : 0;
+              return `${num.toFixed(2)} ₽`;
+            })()}
+            variant="secondary"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            }
+            className="animate-slide-up"
+            style={{ animationDelay: '0.3s' }}
+          />
+        </div>
+
+        {error && (
+          <Alert
+            variant="error"
+            onClose={() => setError("")}
+            className="mb-6 animate-slide-up"
+          >
+            {error}
+          </Alert>
+        )}
+
+        {/* Поиск и фильтры */}
+        <div className="mb-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Input
+              type="text"
+              placeholder="Поиск по ID, описанию, транзакции..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              }
+            />
+
+            <Select
+              label="Статус"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              options={[
+                { value: "all", label: "Все статусы" },
+                { value: "pending", label: "Ожидание" },
+                { value: "processing", label: "Обработка" },
+                { value: "completed", label: "Завершен" },
+                { value: "failed", label: "Ошибка" },
+                { value: "refunded", label: "Возврат" },
+              ]}
+            />
+
+            <Select
+              label="Тип"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              options={[
+                { value: "all", label: "Все типы" },
+                { value: "order_payment", label: "Оплата заказа" },
+                { value: "commission", label: "Комиссия" },
+                { value: "withdrawal", label: "Вывод" },
+              ]}
+            />
+
+            {(searchTerm !== "" || statusFilter !== "all" || typeFilter !== "all") && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm("");
+                  setStatusFilter("all");
+                  setTypeFilter("all");
+                }}
+                leftIcon={
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                }
+                className="sm:col-span-2 lg:col-span-1"
+              >
+                Сбросить
+              </Button>
+            )}
           </div>
 
-          {/* Общая статистика */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md p-4 text-white">
-              <p className="text-sm font-medium text-green-100">Всего платежей</p>
-              <p className="text-2xl font-bold mt-1">{filteredPayments.length}</p>
-            </div>
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md p-4 text-white">
-              <p className="text-sm font-medium text-blue-100">Завершенных</p>
-              <p className="text-2xl font-bold mt-1">
-                {filteredPayments.filter((p) => p.status === "completed").length}
-              </p>
-            </div>
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md p-4 text-white">
-              <p className="text-sm font-medium text-purple-100">Общая сумма</p>
-              <p className="text-2xl font-bold mt-1">
-                {(() => {
-                  const num = typeof totalAmount === "number" && !isNaN(totalAmount) 
-                    ? totalAmount 
-                    : 0;
-                  return num.toFixed(2);
-                })()} ₽
-              </p>
-            </div>
-          </div>
-
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {error}
-            </div>
-          )}
-
-          {/* Поиск и фильтры */}
-          <div className="mb-6 space-y-4">
-            {/* Поиск */}
-            <div>
-              <input
-                type="text"
-                placeholder="Поиск по ID, описанию, транзакции..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Фильтры */}
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Статус
-                </label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">Все статусы</option>
-                  <option value="pending">Ожидание</option>
-                  <option value="processing">Обработка</option>
-                  <option value="completed">Завершен</option>
-                  <option value="failed">Ошибка</option>
-                  <option value="refunded">Возврат</option>
-                </select>
-              </div>
-
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Тип
-                </label>
-                <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">Все типы</option>
-                  <option value="order_payment">Оплата заказа</option>
-                  <option value="commission">Комиссия</option>
-                  <option value="withdrawal">Вывод</option>
-                </select>
-              </div>
-
-              {(searchTerm !== "" || statusFilter !== "all" || typeFilter !== "all") && (
-                <div className="flex items-end">
-                  <button
-                    onClick={() => {
-                      setSearchTerm("");
-                      setStatusFilter("all");
-                      setTypeFilter("all");
-                    }}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Сбросить
-                  </button>
-                </div>
+          {/* Счетчик результатов */}
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Найдено: <span className="font-semibold text-gray-900 dark:text-gray-100">{filteredPayments.length}</span> из <span className="font-semibold text-gray-900 dark:text-gray-100">{payments.length}</span>
+              {filteredPayments.length !== payments.length && (
+                <Badge variant="info" size="sm" className="ml-2">
+                  Экспорт к отфильтрованным данным
+                </Badge>
               )}
             </div>
-
-            {/* Счетчик результатов и информация об экспорте */}
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-600">
-                Найдено: {filteredPayments.length} из {payments.length}
-                {filteredPayments.length !== payments.length && (
-                  <span className="ml-2 text-blue-600">
-                    (Экспорт будет применен к отфильтрованным данным)
-                  </span>
-                )}
-              </div>
-            </div>
           </div>
+        </div>
 
-          <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Тип
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Статус
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Сумма
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Дата
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Действия
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedPayments.map((payment) => (
-                    <tr key={payment.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-mono text-gray-900">
+        {/* Mobile Cards View */}
+        <div className="block md:hidden space-y-4">
+          {paginatedPayments.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 dark:text-gray-400">
+                {payments.length === 0
+                  ? "Нет платежей. Создайте первый платеж, нажав на кнопку выше."
+                  : "Ничего не найдено. Попробуйте изменить фильтры."}
+              </p>
+            </div>
+          ) : (
+            paginatedPayments.map((payment) => {
+              const amount = typeof payment.amount === "number"
+                ? payment.amount
+                : parseFloat(String(payment.amount || 0)) || 0;
+              return (
+                <MobileTableCard
+                  key={payment.id}
+                  title={getTypeLabel(payment.type)}
+                  subtitle={`ID: ${payment.id.substring(0, 8)}...`}
+                  badge={
+                    <Badge variant={getStatusBadgeVariant(payment.status)} size="sm">
+                      {getStatusLabel(payment.status)}
+                    </Badge>
+                  }
+                  fields={[
+                    {
+                      label: "Сумма",
+                      value: `${amount.toFixed(2)} ${payment.currency || "RUB"}`,
+                    },
+                    {
+                      label: "Дата",
+                      value: new Date(payment.createdAt).toLocaleDateString("ru-RU"),
+                    },
+                  ]}
+                  actions={
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(payment)}
+                        title="Редактировать"
+                        leftIcon={
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        }
+                      >
+                        Редактировать
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(payment.id)}
+                        className="text-error-600 hover:text-error-700"
+                        title="Удалить"
+                        leftIcon={
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        }
+                      >
+                        Удалить
+                      </Button>
+                    </>
+                  }
+                  onClick={() => handleEdit(payment)}
+                />
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden md:block">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Тип</TableHead>
+                <TableHead>Статус</TableHead>
+                <TableHead>Сумма</TableHead>
+                <TableHead>Дата</TableHead>
+                <TableHead className="text-right">Действия</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedPayments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-12">
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {payments.length === 0
+                        ? "Нет платежей. Создайте первый платеж, нажав на кнопку выше."
+                        : "Ничего не найдено. Попробуйте изменить фильтры."}
+                    </p>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedPayments.map((payment) => {
+                  const amount = typeof payment.amount === "number"
+                    ? payment.amount
+                    : parseFloat(String(payment.amount || 0)) || 0;
+                  return (
+                    <TableRow key={payment.id}>
+                      <TableCell>
+                        <div className="text-sm font-mono text-gray-900 dark:text-gray-100">
                           {payment.id.substring(0, 8)}...
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-gray-900 dark:text-gray-100">
                           {getTypeLabel(payment.type)}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(payment.status)}`}
-                        >
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusBadgeVariant(payment.status)} size="sm">
                           {getStatusLabel(payment.status)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {(() => {
-                            try {
-                              const amount = typeof payment.amount === "number" 
-                                ? payment.amount 
-                                : parseFloat(String(payment.amount || 0));
-                              const numAmount = isNaN(amount) ? 0 : amount;
-                              return typeof numAmount === "number" 
-                                ? numAmount.toFixed(2) 
-                                : "0.00";
-                            } catch (error) {
-                              console.error("Error formatting amount:", error, payment);
-                              return "0.00";
-                            }
-                          })()} {payment.currency || "RUB"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {amount.toFixed(2)} {payment.currency || "RUB"}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(payment.createdAt).toLocaleDateString("ru-RU")}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => handleEdit(payment)}
-                          className="text-blue-600 hover:text-blue-900 mr-4"
-                        >
-                          Редактировать
-                        </button>
-                        <button
-                          onClick={() => handleDelete(payment.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Удалить
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {paginatedPayments.length === 0 && !loading && (
-                <div className="text-center py-12">
-                  {payments.length === 0 ? (
-                    <div>
-                      <p className="text-gray-600 text-lg mb-2">Нет платежей</p>
-                      <p className="text-sm text-gray-500">
-                        Создайте первый платеж, нажав на кнопку "Создать платеж"
-                      </p>
-                    </div>
-                  ) : (
-                    <div>
-                      <p className="text-gray-600 text-lg mb-2">Ничего не найдено</p>
-                      <p className="text-sm text-gray-500 mt-2">
-                        Попробуйте изменить фильтры или поисковый запрос
-                      </p>
-                    </div>
-                  )}
-                </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(payment.createdAt).toLocaleDateString("ru-RU")}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(payment)}
+                          >
+                            Редактировать
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(payment.id)}
+                            className="text-error-600 hover:text-error-700"
+                          >
+                            Удалить
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
-            </div>
-          </div>
+            </TableBody>
+          </Table>
+        </div>
 
-          {/* Пагинация */}
-          {filteredPayments.length > 0 && (
+        {/* Пагинация */}
+        {filteredPayments.length > 0 && (
+          <div className="mt-6">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -545,9 +621,9 @@ export default function Payments() {
                 setCurrentPage(1);
               }}
             />
-          )}
-        </div>
-      </div>
+          </div>
+        )}
+      </Card>
 
       <PaymentModal
         isOpen={isModalOpen}

@@ -1,15 +1,16 @@
-import { HTMLAttributes, ReactNode, forwardRef } from 'react';
+import { HTMLAttributes, forwardRef } from 'react';
+import type { ReactNode } from 'react';
 import { cn } from '../../utils/cn';
 
 export interface TableProps extends HTMLAttributes<HTMLTableElement> {
   children: ReactNode;
 }
 
-export interface TableHeaderProps extends HTMLAttributes<HTMLTheadElement> {
+export interface TableHeaderProps extends HTMLAttributes<HTMLTableSectionElement> {
   children: ReactNode;
 }
 
-export interface TableBodyProps extends HTMLAttributes<HTMLTBodyElement> {
+export interface TableBodyProps extends HTMLAttributes<HTMLTableSectionElement> {
   children: ReactNode;
 }
 

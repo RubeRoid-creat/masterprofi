@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Cart
 import { statsAPI, usersAPI, ordersAPI, paymentsAPI } from "../services/api";
 import { useTranslation } from "react-i18next";
 import { useDataSync } from "../hooks/useDataSync";
-import { StatCard, Card, Button } from "../components/ui";
+import { StatCard, Card } from "../components/ui";
 
 export default function Dashboard() {
   const navigate = useNavigate();

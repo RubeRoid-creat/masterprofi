@@ -291,7 +291,7 @@ export default function Schedule() {
               min="15"
               max="240"
               step="15"
-              description="От 15 до 240 минут, шаг 15"
+              helperText="От 15 до 240 минут, шаг 15"
             />
 
             <div className="grid grid-cols-2 gap-4">
@@ -403,7 +403,7 @@ export default function Schedule() {
                     <div className="flex gap-2 ml-4">
                       {slot.status === "available" && (
                         <Button
-                          variant="danger"
+                          variant="error"
                           size="sm"
                           onClick={() => handleBlockSlot(slot.id)}
                           title="Заблокировать слот"

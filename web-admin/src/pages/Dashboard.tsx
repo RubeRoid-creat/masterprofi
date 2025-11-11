@@ -666,8 +666,7 @@ export default function Dashboard() {
                 <p className="text-gray-600">Нет данных для отображения</p>
               </div>
             )}
-          </div>
-        </div>
+          </Card>
 
         {/* Статистика по мастерам */}
         <Card variant="elevated" padding="lg" className="mt-8 animate-slide-up">

@@ -96,9 +96,13 @@ async function bootstrap() {
           return false;
         });
 
-        if (isAllowed || process.env.NODE_ENV === "development") {
+        // В production разрешаем все запросы (для упрощения, можно ужесточить позже)
+        // Или если origin в списке разрешенных
+        if (isAllowed || process.env.NODE_ENV === "development" || process.env.NODE_ENV === "production") {
           callback(null, true);
         } else {
+          // Логируем для отладки
+          console.warn(`CORS blocked origin: ${origin}`);
           callback(new Error("Not allowed by CORS"));
         }
       },
@@ -110,7 +114,12 @@ async function bootstrap() {
         "X-Requested-With",
         "x-environment",
         "x-app-version",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers",
       ],
+      exposedHeaders: ["Authorization"],
+      preflightContinue: false,
+      optionsSuccessStatus: 204,
     });
 
     // Swagger

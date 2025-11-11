@@ -6,7 +6,8 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../hooks/useLanguage";
 import { useTranslation } from "react-i18next";
 import { Button, Badge } from "./ui";
-import Sidebar, { SidebarItem } from "./ui/Sidebar";
+import Sidebar from "./ui/Sidebar";
+import type { SidebarItem } from "./ui/Sidebar";
 
 interface LayoutProps {
   children: ReactNode;

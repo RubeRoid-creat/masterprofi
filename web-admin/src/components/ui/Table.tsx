@@ -27,6 +27,8 @@ export interface TableHeadProps extends HTMLAttributes<HTMLTableCellElement> {
 
 export interface TableCellProps extends HTMLAttributes<HTMLTableCellElement> {
   children: ReactNode;
+  colSpan?: number;
+  rowSpan?: number;
 }
 
 const Table = forwardRef<HTMLTableElement, TableProps>(

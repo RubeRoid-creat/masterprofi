@@ -472,17 +472,6 @@ export default function Orders() {
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    const labels: { [key: string]: string } = {
-      created: "Создан",
-      assigned: "Назначен",
-      in_progress: "В работе",
-      completed: "Завершен",
-      cancelled: "Отменен",
-    };
-    return labels[status] || status;
-  };
-
   return (
     <div className="animate-fade-in">
       <Card variant="elevated" padding="lg" className="animate-slide-up">

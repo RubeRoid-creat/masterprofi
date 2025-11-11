@@ -491,7 +491,7 @@ export default function MLM() {
             )}
           </>
         )}
-      </div>
+      </Card>
 
       <AddReferralModal
         isOpen={isAddReferralModalOpen}

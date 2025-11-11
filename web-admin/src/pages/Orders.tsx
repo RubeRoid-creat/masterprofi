@@ -9,6 +9,7 @@ import StarRating from "../components/StarRating";
 import { ordersAPI, usersAPI, reviewsAPI, scheduleAPI } from "../services/api";
 import { exportToExcel, exportToCSV, formatDate, formatAmount } from "../utils/export";
 import { useSocket } from "../hooks/useSocket";
+import { Button, Card, Input, Badge, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui";
 
 interface Order {
   id: string;
@@ -292,22 +293,6 @@ export default function Orders() {
     }
   };
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "created":
-        return "bg-blue-100 text-blue-800";
-      case "assigned":
-        return "bg-yellow-100 text-yellow-800";
-      case "in_progress":
-        return "bg-purple-100 text-purple-800";
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
   const getStatusLabel = (status: string) => {
     const labels: { [key: string]: string } = {
@@ -470,143 +455,187 @@ export default function Orders() {
     }
   };
 
+  const getStatusBadgeVariant = (status: string): "primary" | "secondary" | "success" | "warning" | "error" | "info" | "gray" => {
+    switch (status) {
+      case "completed":
+        return "success";
+      case "in_progress":
+        return "primary";
+      case "assigned":
+        return "info";
+      case "cancelled":
+        return "error";
+      case "created":
+        return "warning";
+      default:
+        return "gray";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels: { [key: string]: string } = {
+      created: "Создан",
+      assigned: "Назначен",
+      in_progress: "В работе",
+      completed: "Завершен",
+      cancelled: "Отменен",
+    };
+    return labels[status] || status;
+  };
+
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900">Заказы</h2>
-              <p className="text-gray-600 mt-2">
-                Все заказы в системе
-              </p>
-            </div>
-            <div className="flex gap-3">
-              {/* Экспорт */}
-              <div className="relative group">
-                <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Экспорт
+    <div className="animate-fade-in">
+      <Card variant="elevated" padding="lg" className="animate-slide-up">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 font-display">Заказы</h2>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Все заказы в системе
+            </p>
+          </div>
+          <div className="flex gap-3 flex-wrap">
+            <div className="relative group">
+              <Button
+                variant="success"
+                rightIcon={
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  <button
-                    onClick={() => handleExport("excel")}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    📊 Excel (.xlsx)
-                  </button>
-                  <button
-                    onClick={() => handleExport("csv")}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    📄 CSV (.csv)
-                  </button>
-                </div>
-              </div>
-              <button
-                onClick={handleCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                }
+                leftIcon={
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                }
               >
-                + Создать заказ
-              </button>
+                Экспорт
+              </Button>
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-medium py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => handleExport("excel")}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  📊 Excel (.xlsx)
+                </button>
+                <button
+                  onClick={() => handleExport("csv")}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  📄 CSV (.csv)
+                </button>
+              </div>
             </div>
+            <Button
+              variant="primary"
+              onClick={handleCreate}
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              }
+            >
+              Создать заказ
+            </Button>
           </div>
+        </div>
 
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {error && (
+          <div className="bg-error-50 dark:bg-error-900/30 border border-error-200 dark:border-error-700 text-error-700 dark:text-error-300 px-4 py-3 rounded-lg mb-6 animate-slide-up">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
               {error}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Переключатель вида */}
-          <div className="mb-4 flex justify-end gap-2">
-            <button
-              onClick={() => setViewMode("table")}
-              className={`px-4 py-2 rounded-md transition-colors ${
-                viewMode === "table"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+        {/* Переключатель вида */}
+        <div className="mb-6 flex justify-end gap-2">
+          <Button
+            variant={viewMode === "table" ? "primary" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("table")}
+            leftIcon={
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            }
+          >
+            Таблица
+          </Button>
+          <Button
+            variant={viewMode === "map" ? "primary" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("map")}
+            leftIcon={
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+            }
+          >
+            Карта
+          </Button>
+        </div>
+
+        {/* Поиск и фильтры */}
+        <div className="mb-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Input
+              type="text"
+              placeholder="Поиск по описанию, ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              }
+            />
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
             >
-              📋 Таблица
-            </button>
-            <button
-              onClick={() => setViewMode("map")}
-              className={`px-4 py-2 rounded-md transition-colors ${
-                viewMode === "map"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              🗺️ Карта
-            </button>
+              <option value="all">Все статусы</option>
+              <option value="created">Создан</option>
+              <option value="assigned">Назначен</option>
+              <option value="in_progress">В работе</option>
+              <option value="completed">Завершен</option>
+              <option value="cancelled">Отменен</option>
+            </select>
+
+            {(searchTerm !== "" || statusFilter !== "all") && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm("");
+                  setStatusFilter("all");
+                }}
+                leftIcon={
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                }
+              >
+                Сбросить
+              </Button>
+            )}
           </div>
 
-          {/* Поиск и фильтры */}
-          <div className="mb-6 space-y-4">
-            {/* Поиск */}
-            <div>
-              <input
-                type="text"
-                placeholder="Поиск по описанию, ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Фильтры */}
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Статус
-                </label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">Все статусы</option>
-                  <option value="created">Создан</option>
-                  <option value="assigned">Назначен</option>
-                  <option value="in_progress">В работе</option>
-                  <option value="completed">Завершен</option>
-                  <option value="cancelled">Отменен</option>
-                </select>
-              </div>
-
-              {(searchTerm !== "" || statusFilter !== "all") && (
-                <div className="flex items-end">
-                  <button
-                    onClick={() => {
-                      setSearchTerm("");
-                      setStatusFilter("all");
-                    }}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Сбросить
-                  </button>
-                </div>
+          {/* Счетчик результатов */}
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Найдено: <span className="font-semibold text-gray-900 dark:text-gray-100">{filteredOrders.length}</span> из <span className="font-semibold text-gray-900 dark:text-gray-100">{orders.length}</span>
+              {filteredOrders.length !== orders.length && (
+                <Badge variant="info" size="sm" className="ml-2">
+                  Экспорт к отфильтрованным данным
+                </Badge>
               )}
             </div>
-
-            {/* Счетчик результатов и информация об экспорте */}
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-600">
-                Найдено: {filteredOrders.length} из {orders.length}
-                {filteredOrders.length !== orders.length && (
-                  <span className="ml-2 text-blue-600">
-                    (Экспорт будет применен к отфильтрованным данным)
-                  </span>
-                )}
-              </div>
-            </div>
           </div>
+        </div>
 
           {loading ? (
             <div className="text-center py-12">
@@ -633,169 +662,158 @@ export default function Orders() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Описание
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Статус
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Сумма
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Дата
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Действия
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-mono text-gray-900">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Описание</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead>Сумма</TableHead>
+                  <TableHead>Дата</TableHead>
+                  <TableHead className="text-right">Действия</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedOrders.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12">
+                      <p className="text-gray-500 dark:text-gray-400">Заказы не найдены</p>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedOrders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell>
+                        <div className="text-sm font-mono text-gray-900 dark:text-gray-100">
                           {order.id.substring(0, 8)}...
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-gray-900 dark:text-gray-100">
                           {order.description || "(без описания)"}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(order.status)}`}
-                        >
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusBadgeVariant(order.status)} size="sm">
                           {getStatusLabel(order.status)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {(typeof order.totalAmount === 'number' ? order.totalAmount : parseFloat(order.totalAmount) || 0).toFixed(2)} ₽
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {(typeof order.totalAmount === 'number' ? order.totalAmount : parseFloat(String(order.totalAmount)) || 0).toFixed(2)} ₽
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString("ru-RU")}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end space-x-2 flex-wrap">
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(order.createdAt).toLocaleDateString("ru-RU")}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2 flex-wrap">
                           {order.status === "completed" && order.masterId && (
                             <>
                               {ordersWithReviews.has(order.id) ? (
-                                <div className="flex items-center gap-2 mr-2">
+                                <div className="flex items-center gap-2">
                                   <StarRating 
                                     rating={ordersWithReviews.get(order.id)?.rating || 0} 
                                     readonly 
                                     size="sm" 
                                   />
-                                  <button
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => handleOpenReviewModal(order)}
-                                    className="text-yellow-600 hover:text-yellow-900 text-xs"
                                     title="Редактировать отзыв"
                                   >
                                     Редактировать
-                                  </button>
+                                  </Button>
                                 </div>
                               ) : (
-                                <button
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
                                   onClick={() => handleOpenReviewModal(order)}
-                                  className="text-yellow-600 hover:text-yellow-900 flex items-center"
                                   title="Оставить отзыв"
+                                  leftIcon={
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                    </svg>
+                                  }
                                 >
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                                  </svg>
-                                  <span className="ml-1 text-xs">Отзыв</span>
-                                </button>
+                                  Отзыв
+                                </Button>
                               )}
                             </>
                           )}
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => {
                               setSelectedOrderForHistory(order.id);
                               setIsHistoryModalOpen(true);
                             }}
-                            className="text-purple-600 hover:text-purple-900 flex items-center"
                             title="История изменений"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </button>
-                          <button
+                            leftIcon={
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            }
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => {
                               setSelectedOrderForChat(order.id);
                               setIsChatOpen(true);
                             }}
-                            className="text-blue-600 hover:text-blue-900 flex items-center"
                             title="Открыть чат"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                          </button>
-                          <button
+                            leftIcon={
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                              </svg>
+                            }
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleEdit(order)}
-                            className="text-blue-600 hover:text-blue-900"
                           >
                             Редактировать
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleDelete(order.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-error-600 hover:text-error-700"
                           >
                             Удалить
-                          </button>
+                          </Button>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {filteredOrders.length === 0 && orders.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-gray-600">Нет заказов</p>
-                </div>
-              )}
-
-              {filteredOrders.length === 0 && orders.length > 0 && (
-                <div className="text-center py-12">
-                  <p className="text-gray-600">Ничего не найдено</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Попробуйте изменить фильтры
-                  </p>
-                </div>
-              )}
-            </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           )}
 
-          {/* Пагинация (только для таблицы) */}
-          {viewMode === "table" && filteredOrders.length > 0 && (
-            <div className="mt-6">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                itemsPerPage={itemsPerPage}
-                totalItems={filteredOrders.length}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={(items) => {
-                  setItemsPerPage(items);
-                  setCurrentPage(1);
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+        {/* Пагинация (только для таблицы) */}
+        {viewMode === "table" && filteredOrders.length > 0 && (
+          <div className="mt-6">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredOrders.length}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={(items) => {
+                setItemsPerPage(items);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        )}
+      </Card>
 
       <OrderModal
         isOpen={isModalOpen}

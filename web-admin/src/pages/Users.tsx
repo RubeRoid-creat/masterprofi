@@ -6,6 +6,7 @@ import { useAdvancedSearch } from "../hooks/useAdvancedSearch";
 import { usersAPI, authAPI } from "../services/api";
 import { exportToExcel, exportToCSV, formatDate } from "../utils/export";
 import { useDataSync } from "../hooks/useDataSync";
+import { Button, Card, Badge, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui";
 
 interface User {
   id: string;
@@ -218,16 +219,17 @@ export default function Users() {
     setCurrentPage(1);
   }, [searchQuery, filters.length]);
 
-  const getRoleBadgeClass = (role: string) => {
-    switch (role) {
+
+  const getRoleBadgeVariant = (role: string): "primary" | "secondary" | "success" | "warning" | "error" | "info" | "gray" => {
+    switch (role?.toLowerCase()) {
       case "admin":
-        return "bg-red-100 text-red-800";
+        return "error";
       case "master":
-        return "bg-purple-100 text-purple-800";
+        return "primary";
       case "client":
-        return "bg-blue-100 text-blue-800";
+        return "success";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "gray";
     }
   };
 
@@ -290,218 +292,213 @@ export default function Users() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-md p-12">
-          <div className="text-center">
-            <p className="text-gray-600 text-lg">Загрузка пользователей...</p>
-          </div>
+      <Card variant="elevated" padding="lg" className="animate-fade-in">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <p className="text-gray-600 dark:text-gray-400 text-lg mt-4">Загрузка пользователей...</p>
         </div>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div>
-      <div className="min-h-screen bg-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900">Пользователи</h2>
-                  <p className="text-gray-600 mt-2">
-                    Управление пользователями системы
-                  </p>
-                </div>
-            <div className="flex gap-3">
-              {/* Экспорт */}
-              <div className="relative group">
-                <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Экспорт
+    <div className="animate-fade-in">
+      <Card variant="elevated" padding="lg" className="animate-slide-up">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 font-display">Пользователи</h2>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Управление пользователями системы
+            </p>
+          </div>
+          <div className="flex gap-3 flex-wrap">
+            <div className="relative group">
+              <Button
+                variant="success"
+                rightIcon={
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  <button
-                    onClick={() => handleExport("excel")}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    📊 Excel (.xlsx)
-                  </button>
-                  <button
-                    onClick={() => handleExport("csv")}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    📄 CSV (.csv)
-                  </button>
-                </div>
-              </div>
-              <button
-                onClick={handleCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                }
+                leftIcon={
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                }
               >
-                + Добавить пользователя
-              </button>
-            </div>
-          </div>
-
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {error}
-            </div>
-          )}
-
-          {/* Расширенный поиск */}
-          <div className="mb-6">
-                <AdvancedSearch
-                  searchQuery={searchQuery}
-                  onSearchChange={handleSearchChange}
-                  onSearchSubmit={handleSearchSubmit}
-                  autocompleteSuggestions={autocompleteSuggestions}
-                  showAutocomplete={showAutocomplete}
-                  onShowAutocompleteChange={setShowAutocomplete}
-                  searchHistory={searchHistory}
-                  filters={filters}
-                  onAddFilter={addFilter}
-                  onRemoveFilter={removeFilter}
-                  onClearFilters={clearFilters}
-                  savedFilters={savedFilters}
-                  onSaveFilter={saveFilter}
-                  onLoadFilter={loadFilter}
-                  onDeleteFilter={deleteFilter}
-                  availableFields={availableFields}
-                />
-                
-                {/* Счетчик результатов */}
-                <div className="mt-4 text-sm text-gray-600">
-                  Найдено: {finalFilteredUsers.length} из {users.length}
-                  {finalFilteredUsers.length !== users.length && (
-                    <span className="ml-2 text-blue-600">
-                      (Экспорт будет применен к отфильтрованным данным)
-                    </span>
-                  )}
-            </div>
-          </div>
-
-          {finalFilteredUsers.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600">
-                {searchQuery || filters.length > 0
-                  ? "Не найдено пользователей, соответствующих критериям поиска"
-                  : "Нет пользователей"}
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Пользователь
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Роль
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Статус
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Дата регистрации
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Действия
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-blue-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-medium">
-                              {(user.firstName?.[0] || user.email[0])?.toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {user.firstName && user.lastName
-                                ? `${user.firstName} ${user.lastName}`
-                                : user.email}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{user.email}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeClass(user.role)}`}
-                        >
-                          {getRoleLabel(user.role)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            user.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {user.isActive ? "Активен" : "Неактивен"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(user.createdAt).toLocaleDateString("ru-RU")}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => handleEdit(user)}
-                          className="text-blue-600 hover:text-blue-900 mr-4"
-                        >
-                          Редактировать
-                        </button>
-                        <button
-                          onClick={() => handleDelete(user.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Удалить
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                </table>
+                Экспорт
+              </Button>
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-medium py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => handleExport("excel")}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  📊 Excel (.xlsx)
+                </button>
+                <button
+                  onClick={() => handleExport("csv")}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  📄 CSV (.csv)
+                </button>
               </div>
-
-              {/* Пагинация */}
-              <div className="mt-4">
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      itemsPerPage={itemsPerPage}
-                      totalItems={finalFilteredUsers.length}
-                      onPageChange={setCurrentPage}
-                      onItemsPerPageChange={(items) => {
-                        setItemsPerPage(items);
-                        setCurrentPage(1);
-                      }}
-                    />
-              </div>
-            </>
-          )}
+            </div>
+            <Button
+              variant="primary"
+              onClick={handleCreate}
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              }
+            >
+              Добавить пользователя
+            </Button>
           </div>
         </div>
-      </div>
+
+        {error && (
+          <div className="bg-error-50 dark:bg-error-900/30 border border-error-200 dark:border-error-700 text-error-700 dark:text-error-300 px-4 py-3 rounded-lg mb-6 animate-slide-up">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              {error}
+            </div>
+          </div>
+        )}
+
+        {/* Расширенный поиск */}
+        <div className="mb-6">
+          <AdvancedSearch
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            onSearchSubmit={handleSearchSubmit}
+            autocompleteSuggestions={autocompleteSuggestions}
+            showAutocomplete={showAutocomplete}
+            onShowAutocompleteChange={setShowAutocomplete}
+            searchHistory={searchHistory}
+            filters={filters}
+            onAddFilter={addFilter}
+            onRemoveFilter={removeFilter}
+            onClearFilters={clearFilters}
+            savedFilters={savedFilters}
+            onSaveFilter={saveFilter}
+            onLoadFilter={loadFilter}
+            onDeleteFilter={deleteFilter}
+            availableFields={availableFields}
+          />
+          
+          {/* Счетчик результатов */}
+          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+            Найдено: <span className="font-semibold text-gray-900 dark:text-gray-100">{finalFilteredUsers.length}</span> из <span className="font-semibold text-gray-900 dark:text-gray-100">{users.length}</span>
+            {finalFilteredUsers.length !== users.length && (
+              <Badge variant="info" size="sm" className="ml-2">
+                Экспорт к отфильтрованным данным
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        {finalFilteredUsers.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 dark:text-gray-400">
+              {searchQuery || filters.length > 0
+                ? "Не найдено пользователей, соответствующих критериям поиска"
+                : "Нет пользователей"}
+            </p>
+          </div>
+        ) : (
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Пользователь</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Роль</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead>Дата регистрации</TableHead>
+                  <TableHead className="text-right">Действия</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-primary-400 to-secondary-500 rounded-full flex items-center justify-center">
+                          <span className="text-white font-semibold text-sm">
+                            {(user.firstName?.[0] || user.email[0])?.toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {user.firstName && user.lastName
+                              ? `${user.firstName} ${user.lastName}`
+                              : user.email}
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm text-gray-900 dark:text-gray-100">{user.email}</div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getRoleBadgeVariant(user.role)} size="sm">
+                        {getRoleLabel(user.role)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={user.isActive ? "success" : "error"} size="sm">
+                        {user.isActive ? "Активен" : "Неактивен"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(user.createdAt).toLocaleDateString("ru-RU")}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(user)}
+                        >
+                          Редактировать
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(user.id)}
+                          className="text-error-600 hover:text-error-700"
+                        >
+                          Удалить
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            {/* Пагинация */}
+            <div className="mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                totalItems={finalFilteredUsers.length}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={(items) => {
+                  setItemsPerPage(items);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          </>
+        )}
+      </Card>
 
       <UserModal
         isOpen={isModalOpen}

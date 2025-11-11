@@ -5,6 +5,7 @@ import MLMTreeView from "../components/MLMTreeView";
 import { mlmAPI } from "../services/api";
 import { useAppSelector } from "../store/hooks";
 import { useDataSync } from "../hooks/useDataSync";
+import { Button, Card, Badge, StatCard } from "../components/ui";
 
 export default function MLM() {
   const { user } = useAppSelector((state) => state.auth);
@@ -176,18 +177,23 @@ export default function MLM() {
   };
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="animate-fade-in">
+      <Card variant="elevated" padding="lg" className="animate-slide-up">
         <div className="mb-6">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">MLM Система</h2>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 font-display">MLM Система</h2>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Партнерская программа и аналитика
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
-            {error}
+          <div className="bg-error-50 dark:bg-error-900/30 border border-error-200 dark:border-error-700 text-error-700 dark:text-error-300 px-4 py-3 rounded-lg mb-6 animate-slide-up">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              {error}
+            </div>
           </div>
         )}
 
@@ -199,31 +205,49 @@ export default function MLM() {
           <>
             {/* Персональная статистика */}
             {stats && (
-              <div className="mb-8">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Ваша статистика</h3>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md p-6 text-white">
-                    <p className="text-sm font-medium text-blue-100 mb-2">Рефералов</p>
-                    <p className="text-3xl font-bold">{stats.referrals || 0}</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md p-6 text-white">
-                    <p className="text-sm font-medium text-green-100 mb-2">Заработано</p>
-                    <p className="text-3xl font-bold">
-                      {(stats.statistics?.totalEarnings || 0).toFixed(2)} ₽
-                    </p>
-                  </div>
-                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md p-6 text-white">
-                    <p className="text-sm font-medium text-purple-100 mb-2">Доступно</p>
-                    <p className="text-3xl font-bold">
-                      {(stats.statistics?.availableBalance || 0).toFixed(2)} ₽
-                    </p>
-                  </div>
-                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-md p-6 text-white">
-                    <p className="text-sm font-medium text-orange-100 mb-2">Выплачено</p>
-                    <p className="text-3xl font-bold">
-                      {(stats.statistics?.withdrawnAmount || 0).toFixed(2)} ₽
-                    </p>
-                  </div>
+              <div className="mb-8 animate-slide-up">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 font-display">Ваша статистика</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <StatCard
+                    title="Рефералов"
+                    value={stats.referrals || 0}
+                    variant="primary"
+                    icon={
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    }
+                  />
+                  <StatCard
+                    title="Заработано"
+                    value={`${(stats.statistics?.totalEarnings || 0).toFixed(2)} ₽`}
+                    variant="success"
+                    icon={
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    }
+                  />
+                  <StatCard
+                    title="Доступно"
+                    value={`${(stats.statistics?.availableBalance || 0).toFixed(2)} ₽`}
+                    variant="secondary"
+                    icon={
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    }
+                  />
+                  <StatCard
+                    title="Выплачено"
+                    value={`${(stats.statistics?.withdrawnAmount || 0).toFixed(2)} ₽`}
+                    variant="warning"
+                    icon={
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    }
+                  />
                 </div>
               </div>
             )}
@@ -260,26 +284,29 @@ export default function MLM() {
 
             {/* Комиссии в реальном времени */}
             {realTimeData && (
-              <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <Card variant="elevated" padding="lg" className="mb-8">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                     Комиссии в реальном времени
                   </h3>
-                  <button
+                  <Button
+                    variant="success"
                     onClick={handleAutomaticPayout}
                     disabled={payoutLoading || !stats?.statistics?.availableBalance || stats.statistics.availableBalance <= 0}
-                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                    isLoading={payoutLoading}
+                    leftIcon={
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    }
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    {payoutLoading ? "Обработка..." : "Автоматическая выплата"}
-                  </button>
+                    Автоматическая выплата
+                  </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
@@ -311,13 +338,9 @@ export default function MLM() {
                             <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                               Уровень {comm.level}: {comm.amount.toFixed(2)} ₽
                             </span>
-                            <span className={`ml-2 text-xs px-2 py-1 rounded ${
-                              comm.status === "paid" 
-                                ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200" 
-                                : "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
-                            }`}>
+                            <Badge variant={comm.status === "paid" ? "success" : "warning"} size="sm" className="ml-2">
                               {comm.status === "paid" ? "Выплачено" : "Ожидает"}
-                            </span>
+                            </Badge>
                           </div>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
                             {new Date(comm.createdAt).toLocaleDateString("ru-RU")}
@@ -337,42 +360,38 @@ export default function MLM() {
                   Ваша партнерская структура
                 </h3>
                 <div className="flex items-center gap-2">
-                  <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                    <button
+                  <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 gap-1">
+                    <Button
+                      variant={viewMode === "tree" ? "primary" : "ghost"}
+                      size="sm"
                       onClick={() => setViewMode("tree")}
-                      className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                        viewMode === "tree"
-                          ? "bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400"
-                          : "text-gray-600 dark:text-gray-400"
-                      }`}
                     >
                       Дерево
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant={viewMode === "list" ? "primary" : "ghost"}
+                      size="sm"
                       onClick={() => setViewMode("list")}
-                      className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                        viewMode === "list"
-                          ? "bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400"
-                          : "text-gray-600 dark:text-gray-400"
-                      }`}
                     >
                       Список
-                    </button>
+                    </Button>
                   </div>
-                  <button
+                  <Button
+                    variant="primary"
                     onClick={() => setIsAddReferralModalOpen(true)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2"
+                    leftIcon={
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
+                    }
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      />
-                    </svg>
                     Добавить реферала
-                  </button>
+                  </Button>
                 </div>
               </div>
               {structure && structure.length > 0 ? (

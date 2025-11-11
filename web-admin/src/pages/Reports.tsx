@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { reportsAPI } from "../services/api";
+import { Button, Card, Input, Select, Alert, LoadingSpinner } from "../components/ui";
 
 type ReportType = "orders" | "mlm" | "financial";
 
@@ -87,343 +88,275 @@ export default function Reports() {
   };
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-gray-900">Отчеты</h2>
-            <p className="text-gray-600 mt-2">
-              Генерация отчетов в PDF формате
-            </p>
-          </div>
+    <div className="animate-fade-in">
+      <Card variant="elevated" padding="lg" className="animate-slide-up">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 font-display">Отчеты</h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Генерация отчетов в PDF формате
+          </p>
+        </div>
 
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {error}
-            </div>
-          )}
+        {error && (
+          <Alert
+            variant="error"
+            onClose={() => setError("")}
+            className="mb-6 animate-slide-up"
+          >
+            {error}
+          </Alert>
+        )}
 
-          {/* Выбор типа отчета */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Тип отчета
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button
-                onClick={() => setReportType("orders")}
-                className={`px-4 py-3 rounded-lg border-2 transition-colors ${
-                  reportType === "orders"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-300 hover:border-gray-400"
-                }`}
-              >
-                <div className="font-semibold">Отчет по заказам</div>
-                <div className="text-sm text-gray-600 mt-1">
-                  Статистика по заказам и их статусам
-                </div>
-              </button>
-
-              <button
-                onClick={() => setReportType("mlm")}
-                className={`px-4 py-3 rounded-lg border-2 transition-colors ${
-                  reportType === "mlm"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-300 hover:border-gray-400"
-                }`}
-              >
-                <div className="font-semibold">Отчет по MLM</div>
-                <div className="text-sm text-gray-600 mt-1">
-                  Статистика по комиссиям и мастерам
-                </div>
-              </button>
-
-              <button
-                onClick={() => setReportType("financial")}
-                className={`px-4 py-3 rounded-lg border-2 transition-colors ${
-                  reportType === "financial"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-300 hover:border-gray-400"
-                }`}
-              >
-                <div className="font-semibold">Финансовый отчет</div>
-                <div className="text-sm text-gray-600 mt-1">
-                  Доходы, расходы и платежи
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Фильтры для отчета по заказам */}
-          {reportType === "orders" && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <h3 className="font-semibold mb-4">Фильтры</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Начальная дата
-                  </label>
-                  <input
-                    type="date"
-                    value={ordersFilters.startDate}
-                    onChange={(e) =>
-                      setOrdersFilters({
-                        ...ordersFilters,
-                        startDate: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Конечная дата
-                  </label>
-                  <input
-                    type="date"
-                    value={ordersFilters.endDate}
-                    onChange={(e) =>
-                      setOrdersFilters({
-                        ...ordersFilters,
-                        endDate: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Статус
-                  </label>
-                  <select
-                    value={ordersFilters.status}
-                    onChange={(e) =>
-                      setOrdersFilters({
-                        ...ordersFilters,
-                        status: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="">Все статусы</option>
-                    <option value="created">Создан</option>
-                    <option value="assigned">Назначен</option>
-                    <option value="in_progress">В работе</option>
-                    <option value="completed">Завершен</option>
-                    <option value="cancelled">Отменен</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    ID клиента (опционально)
-                  </label>
-                  <input
-                    type="text"
-                    value={ordersFilters.clientId}
-                    onChange={(e) =>
-                      setOrdersFilters({
-                        ...ordersFilters,
-                        clientId: e.target.value,
-                      })
-                    }
-                    placeholder="UUID клиента"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    ID мастера (опционально)
-                  </label>
-                  <input
-                    type="text"
-                    value={ordersFilters.masterId}
-                    onChange={(e) =>
-                      setOrdersFilters({
-                        ...ordersFilters,
-                        masterId: e.target.value,
-                      })
-                    }
-                    placeholder="UUID мастера"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Фильтры для MLM отчета */}
-          {reportType === "mlm" && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <h3 className="font-semibold mb-4">Фильтры</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Начальная дата
-                  </label>
-                  <input
-                    type="date"
-                    value={mlmFilters.startDate}
-                    onChange={(e) =>
-                      setMlmFilters({
-                        ...mlmFilters,
-                        startDate: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Конечная дата
-                  </label>
-                  <input
-                    type="date"
-                    value={mlmFilters.endDate}
-                    onChange={(e) =>
-                      setMlmFilters({
-                        ...mlmFilters,
-                        endDate: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    ID мастера (опционально)
-                  </label>
-                  <input
-                    type="text"
-                    value={mlmFilters.masterId}
-                    onChange={(e) =>
-                      setMlmFilters({
-                        ...mlmFilters,
-                        masterId: e.target.value,
-                      })
-                    }
-                    placeholder="UUID мастера"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Фильтры для финансового отчета */}
-          {reportType === "financial" && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <h3 className="font-semibold mb-4">Фильтры</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Начальная дата
-                  </label>
-                  <input
-                    type="date"
-                    value={financialFilters.startDate}
-                    onChange={(e) =>
-                      setFinancialFilters({
-                        ...financialFilters,
-                        startDate: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Конечная дата
-                  </label>
-                  <input
-                    type="date"
-                    value={financialFilters.endDate}
-                    onChange={(e) =>
-                      setFinancialFilters({
-                        ...financialFilters,
-                        endDate: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Статус платежа
-                  </label>
-                  <select
-                    value={financialFilters.paymentStatus}
-                    onChange={(e) =>
-                      setFinancialFilters({
-                        ...financialFilters,
-                        paymentStatus: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="">Все статусы</option>
-                    <option value="pending">Ожидает</option>
-                    <option value="processing">Обрабатывается</option>
-                    <option value="completed">Завершен</option>
-                    <option value="failed">Ошибка</option>
-                    <option value="refunded">Возвращен</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Кнопка генерации */}
-          <div className="flex justify-end">
-            <button
-              onClick={handleGenerateReport}
-              disabled={loading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+        {/* Выбор типа отчета */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+            Тип отчета
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card
+              variant={reportType === "orders" ? "elevated" : "outlined"}
+              padding="md"
+              className={`cursor-pointer transition-all duration-200 ${
+                reportType === "orders"
+                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                  : "hover:border-primary-300 hover:shadow-md"
+              }`}
+              onClick={() => setReportType("orders")}
             >
-              {loading ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Генерация...
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  Сгенерировать отчет
-                </>
-              )}
-            </button>
+              <div className="font-semibold text-gray-900 dark:text-gray-100">Отчет по заказам</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Статистика по заказам и их статусам
+              </div>
+            </Card>
+
+            <Card
+              variant={reportType === "mlm" ? "elevated" : "outlined"}
+              padding="md"
+              className={`cursor-pointer transition-all duration-200 ${
+                reportType === "mlm"
+                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                  : "hover:border-primary-300 hover:shadow-md"
+              }`}
+              onClick={() => setReportType("mlm")}
+            >
+              <div className="font-semibold text-gray-900 dark:text-gray-100">Отчет по MLM</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Статистика по комиссиям и мастерам
+              </div>
+            </Card>
+
+            <Card
+              variant={reportType === "financial" ? "elevated" : "outlined"}
+              padding="md"
+              className={`cursor-pointer transition-all duration-200 ${
+                reportType === "financial"
+                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                  : "hover:border-primary-300 hover:shadow-md"
+              }`}
+              onClick={() => setReportType("financial")}
+            >
+              <div className="font-semibold text-gray-900 dark:text-gray-100">Финансовый отчет</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Доходы, расходы и платежи
+              </div>
+            </Card>
           </div>
         </div>
-      </div>
+
+        {/* Фильтры для отчета по заказам */}
+        {reportType === "orders" && (
+          <Card variant="flat" padding="md" className="mb-6">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Фильтры</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                type="date"
+                label="Начальная дата"
+                value={ordersFilters.startDate}
+                onChange={(e) =>
+                  setOrdersFilters({
+                    ...ordersFilters,
+                    startDate: e.target.value,
+                  })
+                }
+              />
+              <Input
+                type="date"
+                label="Конечная дата"
+                value={ordersFilters.endDate}
+                onChange={(e) =>
+                  setOrdersFilters({
+                    ...ordersFilters,
+                    endDate: e.target.value,
+                  })
+                }
+              />
+              <Select
+                label="Статус"
+                value={ordersFilters.status}
+                onChange={(e) =>
+                  setOrdersFilters({
+                    ...ordersFilters,
+                    status: e.target.value,
+                  })
+                }
+                options={[
+                  { value: "", label: "Все статусы" },
+                  { value: "created", label: "Создан" },
+                  { value: "assigned", label: "Назначен" },
+                  { value: "in_progress", label: "В работе" },
+                  { value: "completed", label: "Завершен" },
+                  { value: "cancelled", label: "Отменен" },
+                ]}
+              />
+              <Input
+                type="text"
+                label="ID клиента (опционально)"
+                value={ordersFilters.clientId}
+                onChange={(e) =>
+                  setOrdersFilters({
+                    ...ordersFilters,
+                    clientId: e.target.value,
+                  })
+                }
+                placeholder="UUID клиента"
+              />
+              <Input
+                type="text"
+                label="ID мастера (опционально)"
+                value={ordersFilters.masterId}
+                onChange={(e) =>
+                  setOrdersFilters({
+                    ...ordersFilters,
+                    masterId: e.target.value,
+                  })
+                }
+                placeholder="UUID мастера"
+              />
+            </div>
+          </Card>
+        )}
+
+        {/* Фильтры для MLM отчета */}
+        {reportType === "mlm" && (
+          <Card variant="flat" padding="md" className="mb-6">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Фильтры</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                type="date"
+                label="Начальная дата"
+                value={mlmFilters.startDate}
+                onChange={(e) =>
+                  setMlmFilters({
+                    ...mlmFilters,
+                    startDate: e.target.value,
+                  })
+                }
+              />
+              <Input
+                type="date"
+                label="Конечная дата"
+                value={mlmFilters.endDate}
+                onChange={(e) =>
+                  setMlmFilters({
+                    ...mlmFilters,
+                    endDate: e.target.value,
+                  })
+                }
+              />
+              <Input
+                type="text"
+                label="ID мастера (опционально)"
+                value={mlmFilters.masterId}
+                onChange={(e) =>
+                  setMlmFilters({
+                    ...mlmFilters,
+                    masterId: e.target.value,
+                  })
+                }
+                placeholder="UUID мастера"
+              />
+            </div>
+          </Card>
+        )}
+
+        {/* Фильтры для финансового отчета */}
+        {reportType === "financial" && (
+          <Card variant="flat" padding="md" className="mb-6">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Фильтры</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                type="date"
+                label="Начальная дата"
+                value={financialFilters.startDate}
+                onChange={(e) =>
+                  setFinancialFilters({
+                    ...financialFilters,
+                    startDate: e.target.value,
+                  })
+                }
+              />
+              <Input
+                type="date"
+                label="Конечная дата"
+                value={financialFilters.endDate}
+                onChange={(e) =>
+                  setFinancialFilters({
+                    ...financialFilters,
+                    endDate: e.target.value,
+                  })
+                }
+              />
+              <Select
+                label="Статус платежа"
+                value={financialFilters.paymentStatus}
+                onChange={(e) =>
+                  setFinancialFilters({
+                    ...financialFilters,
+                    paymentStatus: e.target.value,
+                  })
+                }
+                options={[
+                  { value: "", label: "Все статусы" },
+                  { value: "pending", label: "Ожидает" },
+                  { value: "processing", label: "Обрабатывается" },
+                  { value: "completed", label: "Завершен" },
+                  { value: "failed", label: "Ошибка" },
+                  { value: "refunded", label: "Возвращен" },
+                ]}
+              />
+            </div>
+          </Card>
+        )}
+
+        {/* Кнопка генерации */}
+        <div className="flex justify-end">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleGenerateReport}
+            isLoading={loading}
+            leftIcon={
+              !loading && (
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              )
+            }
+          >
+            {loading ? "Генерация..." : "Сгенерировать отчет"}
+          </Button>
+        </div>
+      </Card>
     </div>
   );
 }

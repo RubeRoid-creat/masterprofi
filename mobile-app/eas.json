@@ -22,7 +22,9 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_ENV": "staging",
-        "NODE_ENV": "production"
+        "NODE_ENV": "production",
+        "EXPO_PUBLIC_API_URL_STAGING": "http://212.74.227.208:3000/api",
+        "EXPO_PUBLIC_WS_URL_STAGING": "ws://212.74.227.208:3000"
       },
       "ios": {
         "simulator": false,
@@ -46,7 +48,9 @@
       "distribution": "store",
       "env": {
         "EXPO_PUBLIC_ENV": "production",
-        "NODE_ENV": "production"
+        "NODE_ENV": "production",
+        "EXPO_PUBLIC_API_URL_PROD": "http://212.74.227.208:3000/api",
+        "EXPO_PUBLIC_WS_URL_PROD": "ws://212.74.227.208:3000"
       },
       "ios": {
         "resourceClass": "m-medium"

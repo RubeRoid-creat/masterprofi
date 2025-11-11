@@ -104,8 +104,8 @@ const environments: Record<Environment, EnvironmentConfig> = {
   },
   staging: {
     environment: 'staging',
-    apiUrl: process.env.EXPO_PUBLIC_API_URL_STAGING || 'https://api-staging.masterprofi.com/api',
-    wsUrl: process.env.EXPO_PUBLIC_WS_URL_STAGING || 'wss://api-staging.masterprofi.com',
+    apiUrl: process.env.EXPO_PUBLIC_API_URL_STAGING || 'http://212.74.227.208:3000/api',
+    wsUrl: process.env.EXPO_PUBLIC_WS_URL_STAGING || 'ws://212.74.227.208:3000',
     apiTimeout: 20000,
     enableLogging: true,
     enableAnalytics: true,
@@ -132,8 +132,8 @@ const environments: Record<Environment, EnvironmentConfig> = {
   },
   production: {
     environment: 'production',
-    apiUrl: process.env.EXPO_PUBLIC_API_URL_PROD || 'https://api.masterprofi.com/api',
-    wsUrl: process.env.EXPO_PUBLIC_WS_URL_PROD || 'wss://api.masterprofi.com',
+    apiUrl: process.env.EXPO_PUBLIC_API_URL_PROD || 'http://212.74.227.208:3000/api',
+    wsUrl: process.env.EXPO_PUBLIC_WS_URL_PROD || 'ws://212.74.227.208:3000',
     apiTimeout: 15000,
     enableLogging: false,
     enableAnalytics: true,

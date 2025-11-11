@@ -143,8 +143,8 @@ module.exports = {
         projectId: 'your-project-id',
       },
       apiUrl: IS_PRODUCTION
-        ? 'https://api.masterprofi.com'
-        : 'https://api-dev.masterprofi.com',
+        ? 'http://212.74.227.208:3000/api'
+        : 'http://212.74.227.208:3000/api',
     },
     runtimeVersion: {
       policy: 'appVersion',

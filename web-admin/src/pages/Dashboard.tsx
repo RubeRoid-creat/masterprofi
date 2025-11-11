@@ -500,7 +500,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 animate-fade-in">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 animate-fade-in">
           <StatCard
             title={t("dashboard.users")}
             value={loading ? 0 : stats.users}
@@ -582,14 +582,14 @@ export default function Dashboard() {
         </div>
 
         {/* Графики */}
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+        <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 animate-fade-in">
           {/* График доходов по периодам */}
           <Card variant="elevated" padding="lg" className="animate-slide-up">
             <h3 className="text-xl font-bold text-gray-900 mb-4">
               Доходы по периодам
             </h3>
             {revenueByPeriod.length > 0 && revenueByPeriod.some((d) => d.revenue > 0) ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <LineChart data={revenueByPeriod}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
@@ -619,7 +619,7 @@ export default function Dashboard() {
               Распределение пользователей
             </h3>
             {roleData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <PieChart>
                   <Pie
                     data={roleData}
@@ -651,7 +651,7 @@ export default function Dashboard() {
               Статусы заказов
             </h3>
             {orderStatusData.some((d) => d.count > 0) ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <BarChart data={orderStatusData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />

@@ -5,6 +5,7 @@ export { default as Input } from './Input';
 export { default as StatCard } from './StatCard';
 export { default as Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from './Table';
 export { default as Sidebar } from './Sidebar';
+export { default as MobileTableCard } from './MobileTableCard';
 
 export type { ButtonProps } from './Button';
 export type { CardProps } from './Card';
@@ -13,4 +14,5 @@ export type { InputProps } from './Input';
 export type { StatCardProps } from './StatCard';
 export type { TableProps, TableHeaderProps, TableBodyProps, TableRowProps, TableHeadProps, TableCellProps } from './Table';
 export type { SidebarProps, SidebarItem } from './Sidebar';
+export type { MobileTableCardProps } from './MobileTableCard';
 

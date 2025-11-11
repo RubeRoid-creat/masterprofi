@@ -10,6 +10,7 @@ import { ordersAPI, usersAPI, reviewsAPI, scheduleAPI } from "../services/api";
 import { exportToExcel, exportToCSV, formatDate, formatAmount } from "../utils/export";
 import { useSocket } from "../hooks/useSocket";
 import { Button, Card, Input, Badge, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui";
+import MobileTableCard from "../components/ui/MobileTableCard";
 
 interface Order {
   id: string;
@@ -569,7 +570,7 @@ export default function Orders() {
 
         {/* Поиск и фильтры */}
         <div className="mb-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Input
               type="text"
               placeholder="Поиск по описанию, ID..."
@@ -651,72 +652,51 @@ export default function Orders() {
               </div>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Описание</TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead>Сумма</TableHead>
-                  <TableHead>Дата</TableHead>
-                  <TableHead className="text-right">Действия</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Mobile Cards View */}
+              <div className="block md:hidden space-y-4">
                 {paginatedOrders.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
-                      <p className="text-gray-500 dark:text-gray-400">Заказы не найдены</p>
-                    </TableCell>
-                  </TableRow>
+                  <div className="text-center py-12">
+                    <p className="text-gray-500 dark:text-gray-400">Заказы не найдены</p>
+                  </div>
                 ) : (
                   paginatedOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>
-                        <div className="text-sm font-mono text-gray-900 dark:text-gray-100">
-                          {order.id.substring(0, 8)}...
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm text-gray-900 dark:text-gray-100">
-                          {order.description || "(без описания)"}
-                        </div>
-                      </TableCell>
-                      <TableCell>
+                    <MobileTableCard
+                      key={order.id}
+                      title={order.description || "(без описания)"}
+                      subtitle={`ID: ${order.id.substring(0, 8)}...`}
+                      badge={
                         <Badge variant={getStatusBadgeVariant(order.status)} size="sm">
                           {getStatusLabel(order.status)}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {(typeof order.totalAmount === 'number' ? order.totalAmount : parseFloat(String(order.totalAmount)) || 0).toFixed(2)} ₽
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(order.createdAt).toLocaleDateString("ru-RU")}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2 flex-wrap">
+                      }
+                      fields={[
+                        {
+                          label: "Сумма",
+                          value: `${(typeof order.totalAmount === 'number' ? order.totalAmount : parseFloat(String(order.totalAmount)) || 0).toFixed(2)} ₽`,
+                        },
+                        {
+                          label: "Дата",
+                          value: new Date(order.createdAt).toLocaleDateString("ru-RU"),
+                        },
+                      ]}
+                      actions={
+                        <>
                           {order.status === "completed" && order.masterId && (
                             <>
                               {ordersWithReviews.has(order.id) ? (
-                                <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleOpenReviewModal(order)}
+                                  title="Редактировать отзыв"
+                                >
                                   <StarRating 
                                     rating={ordersWithReviews.get(order.id)?.rating || 0} 
                                     readonly 
                                     size="sm" 
                                   />
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleOpenReviewModal(order)}
-                                    title="Редактировать отзыв"
-                                  >
-                                    Редактировать
-                                  </Button>
-                                </div>
+                                </Button>
                               ) : (
                                 <Button
                                   variant="ghost"
@@ -747,7 +727,9 @@ export default function Orders() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                             }
-                          />
+                          >
+                            История
+                          </Button>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -755,8 +737,158 @@ export default function Orders() {
                               setSelectedOrderForChat(order.id);
                               setIsChatOpen(true);
                             }}
-                            title="Открыть чат"
+                            title="Чат"
                             leftIcon={
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                              </svg>
+                            }
+                          >
+                            Чат
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(order)}
+                            title="Редактировать"
+                            leftIcon={
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            }
+                          >
+                            Редактировать
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(order.id)}
+                            className="text-error-600 hover:text-error-700"
+                            title="Удалить"
+                            leftIcon={
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            }
+                          >
+                            Удалить
+                          </Button>
+                        </>
+                      }
+                      onClick={() => handleEdit(order)}
+                    />
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Описание</TableHead>
+                      <TableHead>Статус</TableHead>
+                      <TableHead>Сумма</TableHead>
+                      <TableHead>Дата</TableHead>
+                      <TableHead className="text-right">Действия</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedOrders.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-12">
+                          <p className="text-gray-500 dark:text-gray-400">Заказы не найдены</p>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      paginatedOrders.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell>
+                            <div className="text-sm font-mono text-gray-900 dark:text-gray-100">
+                              {order.id.substring(0, 8)}...
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-gray-900 dark:text-gray-100">
+                              {order.description || "(без описания)"}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusBadgeVariant(order.status)} size="sm">
+                              {getStatusLabel(order.status)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              {(typeof order.totalAmount === 'number' ? order.totalAmount : parseFloat(String(order.totalAmount)) || 0).toFixed(2)} ₽
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {new Date(order.createdAt).toLocaleDateString("ru-RU")}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2 flex-wrap">
+                              {order.status === "completed" && order.masterId && (
+                                <>
+                                  {ordersWithReviews.has(order.id) ? (
+                                    <div className="flex items-center gap-2">
+                                      <StarRating 
+                                        rating={ordersWithReviews.get(order.id)?.rating || 0} 
+                                        readonly 
+                                        size="sm" 
+                                      />
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleOpenReviewModal(order)}
+                                        title="Редактировать отзыв"
+                                      >
+                                        Редактировать
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleOpenReviewModal(order)}
+                                      title="Оставить отзыв"
+                                      leftIcon={
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                      </svg>
+                                    }
+                                  >
+                                    Отзыв
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedOrderForHistory(order.id);
+                                setIsHistoryModalOpen(true);
+                              }}
+                              title="История изменений"
+                              leftIcon={
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              }
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedOrderForChat(order.id);
+                                setIsChatOpen(true);
+                              }}
+                              title="Открыть чат"
+                              leftIcon={
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                               </svg>

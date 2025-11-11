@@ -7,6 +7,7 @@ import { usersAPI, authAPI } from "../services/api";
 import { exportToExcel, exportToCSV, formatDate } from "../utils/export";
 import { useDataSync } from "../hooks/useDataSync";
 import { Button, Card, Badge, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui";
+import MobileTableCard from "../components/ui/MobileTableCard";
 
 interface User {
   id: string;
@@ -410,60 +411,48 @@ export default function Users() {
           </div>
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Пользователь</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Роль</TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead>Дата регистрации</TableHead>
-                  <TableHead className="text-right">Действия</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-primary-400 to-secondary-500 rounded-full flex items-center justify-center">
-                          <span className="text-white font-semibold text-sm">
-                            {(user.firstName?.[0] || user.email[0])?.toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {user.firstName && user.lastName
-                              ? `${user.firstName} ${user.lastName}`
-                              : user.email}
-                          </div>
-                        </div>
+            {/* Mobile Cards View */}
+            <div className="block md:hidden space-y-4">
+              {paginatedUsers.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 dark:text-gray-400">Пользователи не найдены</p>
+                </div>
+              ) : (
+                paginatedUsers.map((user) => (
+                  <MobileTableCard
+                    key={user.id}
+                    title={user.firstName && user.lastName
+                      ? `${user.firstName} ${user.lastName}`
+                      : user.email}
+                    subtitle={user.email}
+                    badge={
+                      <div className="flex gap-2">
+                        <Badge variant={getRoleBadgeVariant(user.role)} size="sm">
+                          {getRoleLabel(user.role)}
+                        </Badge>
+                        <Badge variant={user.isActive ? "success" : "error"} size="sm">
+                          {user.isActive ? "Активен" : "Неактивен"}
+                        </Badge>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm text-gray-900 dark:text-gray-100">{user.email}</div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getRoleBadgeVariant(user.role)} size="sm">
-                        {getRoleLabel(user.role)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.isActive ? "success" : "error"} size="sm">
-                        {user.isActive ? "Активен" : "Неактивен"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(user.createdAt).toLocaleDateString("ru-RU")}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    }
+                    fields={[
+                      {
+                        label: "Дата регистрации",
+                        value: new Date(user.createdAt).toLocaleDateString("ru-RU"),
+                      },
+                    ]}
+                    actions={
+                      <>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEdit(user)}
+                          title="Редактировать"
+                          leftIcon={
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          }
                         >
                           Редактировать
                         </Button>
@@ -472,15 +461,97 @@ export default function Users() {
                           size="sm"
                           onClick={() => handleDelete(user.id)}
                           className="text-error-600 hover:text-error-700"
+                          title="Удалить"
+                          leftIcon={
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          }
                         >
                           Удалить
                         </Button>
-                      </div>
-                    </TableCell>
+                      </>
+                    }
+                    onClick={() => handleEdit(user)}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Пользователь</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Роль</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead>Дата регистрации</TableHead>
+                    <TableHead className="text-right">Действия</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-primary-400 to-secondary-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-semibold text-sm">
+                              {(user.firstName?.[0] || user.email[0])?.toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              {user.firstName && user.lastName
+                                ? `${user.firstName} ${user.lastName}`
+                                : user.email}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-gray-900 dark:text-gray-100">{user.email}</div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getRoleBadgeVariant(user.role)} size="sm">
+                          {getRoleLabel(user.role)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.isActive ? "success" : "error"} size="sm">
+                          {user.isActive ? "Активен" : "Неактивен"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(user.createdAt).toLocaleDateString("ru-RU")}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(user)}
+                          >
+                            Редактировать
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(user.id)}
+                            className="text-error-600 hover:text-error-700"
+                          >
+                            Удалить
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
             {/* Пагинация */}
             <div className="mt-6">

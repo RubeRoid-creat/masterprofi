@@ -17,6 +17,8 @@ export interface SidebarProps extends HTMLAttributes<HTMLDivElement> {
   onNavigate: (path: string) => void;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 export default function Sidebar({
@@ -25,6 +27,8 @@ export default function Sidebar({
   onNavigate,
   collapsed = false,
   onToggleCollapse,
+  mobileOpen = false,
+  onMobileClose,
   className,
   ...props
 }: SidebarProps) {
@@ -113,15 +117,28 @@ export default function Sidebar({
   };
 
   return (
-    <aside
-      className={cn(
-        'bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700',
-        'transition-all duration-300',
-        collapsed ? 'w-20' : 'w-64',
-        className
+    <>
+      {/* Mobile Overlay */}
+      {mobileOpen && onMobileClose && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onMobileClose}
+          aria-hidden="true"
+        />
       )}
-      {...props}
-    >
+      
+      <aside
+        className={cn(
+          'bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700',
+          'transition-all duration-300',
+          'fixed lg:static inset-y-0 left-0 z-50',
+          'transform',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          collapsed ? 'w-20' : 'w-64',
+          className
+        )}
+        {...props}
+      >
       <div className="flex flex-col h-full">
         {onToggleCollapse && (
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -155,6 +172,7 @@ export default function Sidebar({
         </nav>
       </div>
     </aside>
+    </>
   );
 }
 

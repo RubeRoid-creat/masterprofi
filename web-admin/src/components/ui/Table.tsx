@@ -35,17 +35,19 @@ export interface TableCellProps extends HTMLAttributes<HTMLTableCellElement> {
 const Table = forwardRef<HTMLTableElement, TableProps>(
   ({ className, children, ...props }, ref) => {
     return (
-      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-        <table
-          ref={ref}
-          className={cn(
-            'min-w-full divide-y divide-gray-200 dark:divide-gray-700',
-            className
-          )}
-          {...props}
-        >
-          {children}
-        </table>
+      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <table
+            ref={ref}
+            className={cn(
+              'min-w-full divide-y divide-gray-200 dark:divide-gray-700',
+              className
+            )}
+            {...props}
+          >
+            {children}
+          </table>
+        </div>
       </div>
     );
   }
@@ -116,7 +118,7 @@ const TableHead = forwardRef<HTMLTableCellElement, TableHeadProps>(
       <th
         ref={ref}
         className={cn(
-          'px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider',
+          'px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider',
           sortable && 'cursor-pointer select-none',
           className
         )}
@@ -163,7 +165,7 @@ const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(
       <td
         ref={ref}
         className={cn(
-          'px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100',
+          'px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100',
           className
         )}
         {...props}

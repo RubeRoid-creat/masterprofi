@@ -139,6 +139,27 @@ export const MLMDashboardScreen: React.FC<MLMDashboardScreenProps> = ({
   } : undefined;
 
   const renderOverview = () => {
+    // Show error if there are critical errors
+    if (hasError && !networkStats) {
+      const primaryError = networkError || teamStatsError || commissionsError;
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            {primaryError && 'status' in primaryError && primaryError.status === 500
+              ? 'Сервер временно недоступен. Пожалуйста, попробуйте позже.'
+              : 'Не удалось загрузить данные о сети'}
+          </Text>
+          <StyledButton
+            title="Обновить"
+            onPress={handleRefresh}
+            variant="primary"
+            size="medium"
+            style={{ marginTop: spacing.md }}
+          />
+        </View>
+      );
+    }
+
     if (!networkStats) {
       return (
         <View style={styles.emptyContainer}>

@@ -8,9 +8,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
   RefreshControl,
   FlatList,
 } from 'react-native';
@@ -26,6 +24,12 @@ import { Q } from '@nozbe/watermelondb';
 import CrmContact from '../database/models/CrmContact';
 import CrmDeal from '../database/models/CrmDeal';
 import { Platform } from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '../theme';
+import { ModernCard } from '../components/common/ModernCard';
+import { StyledButton } from '../components/common/StyledButton';
+import { Badge } from '../components/ui/Badge';
+import { Alert } from '../components/ui/Alert';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 export const CrmSyncScreen: React.FC = () => {
   const [isOnline, setIsOnline] = useState(true);
@@ -153,201 +157,254 @@ export const CrmSyncScreen: React.FC = () => {
   return (
     <ScrollView
       style={styles.container}
+      contentContainerStyle={styles.content}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        <RefreshControl 
+          refreshing={refreshing} 
+          onRefresh={handleRefresh}
+          tintColor={colors.primary[600]}
+        />
       }
+      showsVerticalScrollIndicator={false}
     >
-      <View style={styles.content}>
-        {/* Connection Status */}
-        <View style={styles.section}>
+      {/* Connection Status */}
+      <ModernCard variant="elevated" padding="medium" style={styles.section}>
+        <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Статус подключения</Text>
-          <View style={[styles.statusRow, !isOnline && styles.statusRowError]}>
-            <View style={[styles.statusIndicator, isOnline ? styles.online : styles.offline]} />
-            <Text style={styles.statusText}>
-              {isOnline ? 'Подключено' : 'Нет подключения'}
+          <Badge
+            label={isOnline ? 'Онлайн' : 'Офлайн'}
+            variant={isOnline ? 'success' : 'error'}
+            size="small"
+          />
+        </View>
+        <View style={[styles.statusRow, !isOnline && styles.statusRowError]}>
+          <View style={[styles.statusIndicator, isOnline ? styles.online : styles.offline]} />
+          <Text style={styles.statusText}>
+            {isOnline ? 'Подключено к интернету' : 'Нет подключения к интернету'}
+          </Text>
+        </View>
+        {!isOnline && (
+          <Alert
+            variant="warning"
+            message="Для синхронизации необходимо подключение к интернету"
+            style={styles.alert}
+          />
+        )}
+      </ModernCard>
+
+      {/* Sync Status */}
+      {syncStatus && (
+        <ModernCard variant="flat" padding="medium" style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Статус синхронизации</Text>
+            {syncStatus.isSyncing && (
+              <LoadingSpinner size="small" color={colors.primary[600]} />
+            )}
+          </View>
+          
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Контактов</Text>
+              <Text style={styles.statValue}>{syncStatus.totalContacts}</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Сделок</Text>
+              <Text style={styles.statValue}>{syncStatus.totalDeals}</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Задач</Text>
+              <Text style={styles.statValue}>{syncStatus.totalTasks}</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Ожидает</Text>
+              <Badge
+                label={syncStatus.pendingChanges}
+                variant={syncStatus.pendingChanges > 0 ? 'warning' : 'success'}
+                size="small"
+              />
+            </View>
+          </View>
+
+          <View style={styles.lastSyncRow}>
+            <Text style={styles.lastSyncLabel}>Последняя синхронизация:</Text>
+            <Text style={styles.lastSyncValue}>
+              {syncStatus.lastSyncAt
+                ? new Date(syncStatus.lastSyncAt).toLocaleString('ru-RU')
+                : 'Никогда'}
             </Text>
           </View>
+
+          {syncStatus.lastError && (
+            <Alert
+              variant="error"
+              message={syncStatus.lastError}
+              style={styles.alert}
+            />
+          )}
+        </ModernCard>
+      )}
+
+      {/* Actions */}
+      <ModernCard variant="elevated" padding="medium" style={styles.section}>
+        <Text style={styles.sectionTitle}>Действия синхронизации</Text>
+        <View style={styles.actionsContainer}>
+          <StyledButton
+            title="Полная синхронизация"
+            onPress={handleInitialSync}
+            variant="primary"
+            size="large"
+            loading={isInitialSyncing}
+            disabled={isLoading || !isOnline}
+            fullWidth={true}
+          />
+          <StyledButton
+            title="Инкрементальная синхронизация"
+            onPress={handleIncrementalSync}
+            variant="outline"
+            size="large"
+            loading={isIncrementalSyncing}
+            disabled={isLoading || !isOnline}
+            fullWidth={true}
+          />
+        </View>
+        {!isOnline && (
+          <Text style={styles.disabledHint}>
+            Синхронизация недоступна без подключения к интернету
+          </Text>
+        )}
+      </ModernCard>
+
+      {/* Data Display */}
+      <ModernCard variant="flat" padding="medium" style={styles.section}>
+        <Text style={styles.sectionTitle}>Синхронизированные данные</Text>
+        
+        {/* Tabs */}
+        <View style={styles.tabs}>
+          <StyledButton
+            title={`Контакты (${contacts.length})`}
+            onPress={() => setActiveTab('contacts')}
+            variant={activeTab === 'contacts' ? 'primary' : 'ghost'}
+            size="medium"
+            fullWidth={false}
+            style={[styles.tabButton, activeTab === 'contacts' && styles.tabButtonActive]}
+          />
+          <StyledButton
+            title={`Сделки (${deals.length})`}
+            onPress={() => setActiveTab('deals')}
+            variant={activeTab === 'deals' ? 'primary' : 'ghost'}
+            size="medium"
+            fullWidth={false}
+            style={[styles.tabButton, activeTab === 'deals' && styles.tabButtonActive]}
+          />
         </View>
 
-        {/* Sync Status */}
-        {syncStatus && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Статус синхронизации</Text>
-            <View style={styles.statusRow}>
-              <Text style={styles.label}>Последняя синхронизация:</Text>
-              <Text style={styles.value}>
-                {syncStatus.lastSyncAt
-                  ? new Date(syncStatus.lastSyncAt).toLocaleString('ru-RU')
-                  : 'Никогда'}
-              </Text>
-            </View>
-            <View style={styles.statusRow}>
-              <Text style={styles.label}>Контактов:</Text>
-              <Text style={styles.value}>{syncStatus.totalContacts}</Text>
-            </View>
-            <View style={styles.statusRow}>
-              <Text style={styles.label}>Сделок:</Text>
-              <Text style={styles.value}>{syncStatus.totalDeals}</Text>
-            </View>
-            <View style={styles.statusRow}>
-              <Text style={styles.label}>Задач:</Text>
-              <Text style={styles.value}>{syncStatus.totalTasks}</Text>
-            </View>
-            <View style={styles.statusRow}>
-              <Text style={styles.label}>Ожидающих отправки:</Text>
-              <Text style={styles.value}>{syncStatus.pendingChanges}</Text>
-            </View>
-            {syncStatus.isSyncing && (
-              <View style={styles.syncingIndicator}>
-                <ActivityIndicator size="small" color="#007AFF" />
-                <Text style={styles.syncingText}>Синхронизация...</Text>
+        {/* Contacts List */}
+        {activeTab === 'contacts' && (
+          <View style={styles.dataContainer}>
+            {contacts.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateIcon}>📇</Text>
+                <Text style={styles.emptyStateText}>Нет синхронизированных контактов</Text>
+                <Text style={styles.emptyStateSubtext}>
+                  Нажмите "Полная синхронизация" для загрузки данных
+                </Text>
               </View>
-            )}
-            {syncStatus.lastError && (
-              <View style={styles.errorBox}>
-                <Text style={styles.errorText}>{syncStatus.lastError}</Text>
-              </View>
+            ) : (
+              <FlatList
+                data={contacts}
+                keyExtractor={(item) => item.id}
+                scrollEnabled={false}
+                nestedScrollEnabled={true}
+                renderItem={({ item }) => (
+                  <ModernCard variant="flat" padding="medium" style={styles.contactCard}>
+                    <View style={styles.contactHeader}>
+                      <Text style={styles.contactName}>{item.name || 'Без имени'}</Text>
+                      <Badge
+                        label={item.status === 'active' ? 'Активен' : 'Неактивен'}
+                        variant={item.status === 'active' ? 'success' : 'gray'}
+                        size="small"
+                      />
+                    </View>
+                    {item.email && (
+                      <View style={styles.contactDetailRow}>
+                        <Text style={styles.contactDetailIcon}>📧</Text>
+                        <Text style={styles.contactDetail}>{item.email}</Text>
+                      </View>
+                    )}
+                    {item.phone && (
+                      <View style={styles.contactDetailRow}>
+                        <Text style={styles.contactDetailIcon}>📱</Text>
+                        <Text style={styles.contactDetail}>{item.phone}</Text>
+                      </View>
+                    )}
+                    <View style={styles.contactFooter}>
+                      <Badge
+                        label={item.isSynced ? 'Синхронизирован' : 'Ожидает'}
+                        variant={item.isSynced ? 'success' : 'warning'}
+                        size="small"
+                      />
+                    </View>
+                  </ModernCard>
+                )}
+              />
             )}
           </View>
         )}
 
-        {/* Actions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Действия</Text>
-          <TouchableOpacity
-            style={[styles.button, styles.primaryButton, isLoading && styles.buttonDisabled]}
-            onPress={handleInitialSync}
-            disabled={isLoading || !isOnline}
-          >
-            {isInitialSyncing ? (
-              <ActivityIndicator color="#fff" />
+        {/* Deals List */}
+        {activeTab === 'deals' && (
+          <View style={styles.dataContainer}>
+            {deals.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateIcon}>💼</Text>
+                <Text style={styles.emptyStateText}>Нет синхронизированных сделок</Text>
+                <Text style={styles.emptyStateSubtext}>
+                  Нажмите "Полная синхронизация" для загрузки данных
+                </Text>
+              </View>
             ) : (
-              <Text style={styles.buttonText}>Полная синхронизация</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, styles.secondaryButton, isLoading && styles.buttonDisabled]}
-            onPress={handleIncrementalSync}
-            disabled={isLoading || !isOnline}
-          >
-            {isIncrementalSyncing ? (
-              <ActivityIndicator color="#007AFF" />
-            ) : (
-              <Text style={[styles.buttonText, styles.secondaryButtonText]}>
-                Инкрементальная синхронизация
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* Data Display */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Синхронизированные данные</Text>
-          
-          {/* Tabs */}
-          <View style={styles.tabs}>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'contacts' && styles.tabActive]}
-              onPress={() => setActiveTab('contacts')}
-            >
-              <Text style={[styles.tabText, activeTab === 'contacts' && styles.tabTextActive]}>
-                Контакты ({contacts.length})
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'deals' && styles.tabActive]}
-              onPress={() => setActiveTab('deals')}
-            >
-              <Text style={[styles.tabText, activeTab === 'deals' && styles.tabTextActive]}>
-                Сделки ({deals.length})
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Contacts List */}
-          {activeTab === 'contacts' && (
-            <View style={styles.dataContainer}>
-              {contacts.length === 0 ? (
-                <View style={styles.emptyState}>
-                  <Text style={styles.emptyStateText}>Нет синхронизированных контактов</Text>
-                  <Text style={styles.emptyStateSubtext}>
-                    Нажмите "Полная синхронизация" для загрузки данных
-                  </Text>
-                </View>
-              ) : (
-                <FlatList
-                  data={contacts}
-                  keyExtractor={(item) => item.id}
-                  scrollEnabled={true}
-                  nestedScrollEnabled={true}
-                  renderItem={({ item }) => (
-                    <View style={styles.contactCard}>
-                      <Text style={styles.contactName}>{item.name || 'Без имени'}</Text>
-                      {item.email && (
-                        <Text style={styles.contactDetail}>📧 {item.email}</Text>
-                      )}
-                      {item.phone && (
-                        <Text style={styles.contactDetail}>📱 {item.phone}</Text>
-                      )}
-                      <View style={styles.contactFooter}>
-                        <Text style={styles.contactStatus}>
-                          {item.status === 'active' ? '✅ Активен' : '❌ Неактивен'}
-                        </Text>
-                        <Text style={styles.contactSync}>
-                          {item.isSynced ? '✓ Синхронизирован' : '⏳ Ожидает'}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                />
-              )}
-            </View>
-          )}
-
-          {/* Deals List */}
-          {activeTab === 'deals' && (
-            <View style={styles.dataContainer}>
-              {deals.length === 0 ? (
-                <View style={styles.emptyState}>
-                  <Text style={styles.emptyStateText}>Нет синхронизированных сделок</Text>
-                  <Text style={styles.emptyStateSubtext}>
-                    Нажмите "Полная синхронизация" для загрузки данных
-                  </Text>
-                </View>
-              ) : (
-                <FlatList
-                  data={deals}
-                  keyExtractor={(item) => item.id}
-                  scrollEnabled={true}
-                  nestedScrollEnabled={true}
-                  renderItem={({ item }) => (
-                    <View style={styles.dealCard}>
+              <FlatList
+                data={deals}
+                keyExtractor={(item) => item.id}
+                scrollEnabled={false}
+                nestedScrollEnabled={true}
+                renderItem={({ item }) => (
+                  <ModernCard variant="flat" padding="medium" style={styles.dealCard}>
+                    <View style={styles.dealHeader}>
                       <Text style={styles.dealTitle}>{item.title || 'Без названия'}</Text>
-                      {item.description && (
-                        <Text style={styles.dealDescription} numberOfLines={2}>
-                          {item.description}
-                        </Text>
+                      {item.stage && (
+                        <Badge
+                          label={item.stage}
+                          variant="info"
+                          size="small"
+                        />
                       )}
-                      <View style={styles.dealFooter}>
+                    </View>
+                    {item.description && (
+                      <Text style={styles.dealDescription} numberOfLines={2}>
+                        {item.description}
+                      </Text>
+                    )}
+                    <View style={styles.dealFooter}>
+                      <View style={styles.dealAmountContainer}>
+                        <Text style={styles.dealAmountLabel}>Сумма:</Text>
                         <Text style={styles.dealAmount}>
-                          {item.amount ? `${item.amount} ${item.currency || 'RUB'}` : 'Сумма не указана'}
-                        </Text>
-                        <Text style={styles.dealStage}>
-                          Статус: {item.stage || 'Не указан'}
+                          {item.amount ? `${item.amount} ${item.currency || 'RUB'}` : 'Не указана'}
                         </Text>
                       </View>
-                      <Text style={styles.dealSync}>
-                        {item.isSynced ? '✓ Синхронизировано' : '⏳ Ожидает синхронизации'}
-                      </Text>
+                      <Badge
+                        label={item.isSynced ? 'Синхронизировано' : 'Ожидает'}
+                        variant={item.isSynced ? 'success' : 'warning'}
+                        size="small"
+                      />
                     </View>
-                  )}
-                />
-              )}
-            </View>
-          )}
-        </View>
-      </View>
+                  </ModernCard>
+                )}
+              />
+            )}
+          </View>
+        )}
+      </ModernCard>
     </ScrollView>
   );
 };
@@ -355,225 +412,217 @@ export const CrmSyncScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background.secondary,
   },
   content: {
-    padding: 16,
+    padding: spacing.md,
+    paddingBottom: spacing['2xl'],
   },
   section: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    marginBottom: spacing.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
-    color: '#333',
+    ...typography.heading.h3,
+    color: colors.text.primary,
+    fontWeight: '700',
   },
   statusRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingVertical: spacing.sm,
   },
   statusRowError: {
-    backgroundColor: '#fff5f5',
+    backgroundColor: colors.error[50],
+    borderRadius: borderRadius.md,
+    padding: spacing.sm,
   },
   statusIndicator: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   online: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.success[600],
   },
   offline: {
-    backgroundColor: '#F44336',
+    backgroundColor: colors.error[600],
   },
   statusText: {
-    fontSize: 16,
-    color: '#333',
+    ...typography.body.medium,
+    color: colors.text.primary,
   },
-  label: {
-    fontSize: 14,
-    color: '#666',
+  alert: {
+    marginTop: spacing.md,
   },
-  value: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-  },
-  syncingIndicator: {
+  statsGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
+  statItem: {
+    flex: 1,
+    minWidth: '45%',
+    backgroundColor: colors.gray[50],
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
     alignItems: 'center',
-    marginTop: 12,
-    padding: 8,
-    backgroundColor: '#e3f2fd',
-    borderRadius: 8,
   },
-  syncingText: {
-    marginLeft: 8,
-    color: '#1976d2',
-    fontSize: 14,
+  statLabel: {
+    ...typography.body.small,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
   },
-  errorBox: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: '#ffebee',
-    borderRadius: 8,
+  statValue: {
+    ...typography.heading.h3,
+    color: colors.text.primary,
+    fontWeight: '700',
   },
-  errorText: {
-    color: '#c62828',
-    fontSize: 14,
-  },
-  button: {
-    padding: 16,
-    borderRadius: 8,
+  lastSyncRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-    minHeight: 50,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
   },
-  primaryButton: {
-    backgroundColor: '#007AFF',
+  lastSyncLabel: {
+    ...typography.body.small,
+    color: colors.text.secondary,
   },
-  secondaryButton: {
-    backgroundColor: '#f0f0f0',
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
+  lastSyncValue: {
+    ...typography.body.medium,
+    color: colors.text.primary,
     fontWeight: '600',
   },
-  secondaryButtonText: {
-    color: '#007AFF',
+  actionsContainer: {
+    gap: spacing.md,
+  },
+  disabledHint: {
+    ...typography.body.small,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+    marginTop: spacing.sm,
   },
   tabs: {
     flexDirection: 'row',
-    marginBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    gap: spacing.md,
+    marginBottom: spacing.lg,
   },
-  tab: {
+  tabButton: {
     flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
   },
-  tabActive: {
-    borderBottomColor: '#007AFF',
-  },
-  tabText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  tabTextActive: {
-    color: '#007AFF',
-    fontWeight: '600',
+  tabButtonActive: {
+    // Active state handled by variant
   },
   dataContainer: {
-    maxHeight: 400,
+    maxHeight: 500,
   },
   emptyState: {
-    padding: 32,
+    padding: spacing['3xl'],
     alignItems: 'center',
   },
+  emptyStateIcon: {
+    fontSize: 48,
+    marginBottom: spacing.md,
+  },
   emptyStateText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 8,
+    ...typography.heading.h4,
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
   emptyStateSubtext: {
-    fontSize: 14,
-    color: '#999',
+    ...typography.body.medium,
+    color: colors.text.secondary,
     textAlign: 'center',
   },
   contactCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
+    marginBottom: spacing.md,
     borderLeftWidth: 3,
-    borderLeftColor: '#007AFF',
+    borderLeftColor: colors.primary[600],
+  },
+  contactHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
   },
   contactName: {
+    ...typography.heading.h4,
+    color: colors.text.primary,
+    fontWeight: '700',
+    flex: 1,
+  },
+  contactDetailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
+  contactDetailIcon: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    marginRight: spacing.sm,
   },
   contactDetail: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+    ...typography.body.medium,
+    color: colors.text.secondary,
   },
   contactFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-    paddingTop: 8,
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  contactStatus: {
-    fontSize: 12,
-    color: '#666',
-  },
-  contactSync: {
-    fontSize: 12,
-    color: '#4CAF50',
+    borderTopColor: colors.border.light,
   },
   dealCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
+    marginBottom: spacing.md,
     borderLeftWidth: 3,
-    borderLeftColor: '#4CAF50',
+    borderLeftColor: colors.success[600],
+  },
+  dealHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
   },
   dealTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    ...typography.heading.h4,
+    color: colors.text.primary,
+    fontWeight: '700',
+    flex: 1,
   },
   dealDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
+    ...typography.body.medium,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
+    lineHeight: 20,
   },
   dealFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+  },
+  dealAmountContainer: {
+    flex: 1,
+  },
+  dealAmountLabel: {
+    ...typography.body.small,
+    color: colors.text.tertiary,
+    marginBottom: spacing.xs,
   },
   dealAmount: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4CAF50',
-  },
-  dealStage: {
-    fontSize: 12,
-    color: '#666',
-  },
-  dealSync: {
-    fontSize: 12,
-    color: '#4CAF50',
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    ...typography.heading.h4,
+    color: colors.success[700],
+    fontWeight: '700',
   },
 });
 

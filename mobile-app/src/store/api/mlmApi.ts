@@ -131,7 +131,7 @@ const baseQueryWithAuth = fetchBaseQuery({
   },
 });
 
-// Enhanced base query with offline detection
+// Enhanced base query with offline detection and error handling
 const baseQueryWithOffline: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -150,7 +150,43 @@ const baseQueryWithOffline: BaseQueryFn<
     };
   }
 
-  return baseQueryWithAuth(args, api, extraOptions);
+  try {
+    const result = await baseQueryWithAuth(args, api, extraOptions);
+    
+    // Handle 500 errors gracefully - don't crash the app
+    if ('error' in result && result.error) {
+      const error = result.error as any;
+      if (error.status === 500) {
+        console.warn('MLM API returned 500 error:', args, error);
+        // Return a more user-friendly error
+        return {
+          error: {
+            status: 'CUSTOM_ERROR',
+            error: 'Сервер временно недоступен. Данные MLM не могут быть загружены.',
+            data: { 
+              message: 'Сервер временно недоступен. Пожалуйста, попробуйте позже.',
+              originalStatus: 500,
+            },
+          } as FetchBaseQueryError,
+        };
+      }
+      if (error.status === 401) {
+        console.warn('MLM API returned 401 error - authentication required');
+        // Don't crash, just return error
+      }
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('MLM API request failed:', error);
+    return {
+      error: {
+        status: 'FETCH_ERROR',
+        error: 'Network request failed',
+        data: { message: 'Ошибка сети. Проверьте подключение к интернету.' },
+      } as FetchBaseQueryError,
+    };
+  }
 };
 
 // RTK Query API

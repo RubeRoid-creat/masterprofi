@@ -20,6 +20,8 @@ class RemoteWipeService {
     enabled: true,
     checkInterval: 5 * 60 * 1000, // 5 minutes
     wipeEndpoint: `${config.apiUrl}/security/wipe-status`,
+    // Note: This endpoint may return 401 if user is not authenticated
+    // This is expected behavior and should be handled gracefully
   };
 
   private checkInterval: NodeJS.Timeout | null = null;
@@ -68,8 +70,8 @@ class RemoteWipeService {
         },
       });
 
-      // Silently ignore 404 errors - endpoint may not be implemented yet
-      if (response.status === 404) {
+      // Silently ignore 404 and 401 errors - endpoint may not be implemented or user not authenticated
+      if (response.status === 404 || response.status === 401) {
         return;
       }
 

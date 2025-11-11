@@ -26,12 +26,15 @@ import {
 import { useGetOrdersQuery } from '../store/api/ordersApi';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useOfflineCache } from '../hooks/useOfflineCache';
+import { useDebounce, useOptimizedList, useMemoizedCallback } from '../hooks';
 import { Order, OrderStatus } from '../types/order';
 import { config } from '../config/environments';
 import { OrderCard } from '../components/orders/OrderCard';
 import { OrderTabs } from '../components/orders/OrderTabs';
 import { OrderMapView } from '../components/lazy';
 import { OrderFiltersComponent } from '../components/orders/OrderFilters';
+import { OptimizedOrdersList } from '../components/orders/OptimizedOrdersList';
+import { OrderBottomSheet } from '../components/orders/OrderBottomSheet';
 import { useAcceptOrderMutation } from '../store/api/ordersApi';
 
 interface OrderFeedScreenProps {
@@ -51,7 +54,21 @@ export const OrderFeedScreen: React.FC<OrderFeedScreenProps> = ({ onOrderPress }
   } = useAppSelector((state) => state.orders);
 
   const [searchText, setSearchText] = useState(searchQuery);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const debouncedSearchText = useDebounce(searchText, 300);
   const { isOffline, cachedOrders, saveOrders } = useOfflineCache();
+
+  // Auto-open bottom sheet when map view is enabled
+  useEffect(() => {
+    if (showMap && filteredOrders.length > 0) {
+      setBottomSheetVisible(true);
+      setSelectedOrder(null); // Show list initially
+    } else if (!showMap) {
+      setBottomSheetVisible(false);
+      setSelectedOrder(null);
+    }
+  }, [showMap, filteredOrders.length]);
 
   // RTK Query
   const {
@@ -195,16 +212,12 @@ export const OrderFeedScreen: React.FC<OrderFeedScreenProps> = ({ onOrderPress }
     }
   }, [error, cachedOrders.length, ordersData, dispatch, saveOrders]);
 
-  // Handle search
+  // Handle search with debounce
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      dispatch(setSearchQuery(searchText));
-    }, 300);
+    dispatch(setSearchQuery(debouncedSearchText));
+  }, [debouncedSearchText, dispatch]);
 
-    return () => clearTimeout(timeoutId);
-  }, [searchText, dispatch]);
-
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = useMemoizedCallback(async () => {
     dispatch(setRefreshing(true));
     try {
       await refetch();
@@ -218,38 +231,58 @@ export const OrderFeedScreen: React.FC<OrderFeedScreenProps> = ({ onOrderPress }
     }
   }, [refetch, dispatch, isOffline]);
 
-  const handleTabChange = (tab: OrderStatus) => {
+  const handleTabChange = useMemoizedCallback((tab: OrderStatus) => {
     dispatch(setActiveTab(tab));
-  };
+  }, [dispatch]);
 
-  const handleOrderPress = (order: Order) => {
+  const handleOrderPress = useMemoizedCallback((order: Order) => {
     if (order.isNew) {
       dispatch(markOrderAsRead(order.id));
     }
-    if (onOrderPress) {
+    
+    // If map view, show bottom sheet
+    if (showMap) {
+      setSelectedOrder(order);
+      setBottomSheetVisible(true);
+    } else if (onOrderPress) {
       onOrderPress(order);
     } else {
       // Default navigation or detail view
       console.log('Order pressed:', order.id);
     }
-  };
+  }, [dispatch, onOrderPress, showMap]);
+  
+  const handleOrderSelect = useMemoizedCallback((order: Order) => {
+    setSelectedOrder(order);
+  }, []);
+  
+  const handleBottomSheetClose = useMemoizedCallback(() => {
+    setBottomSheetVisible(false);
+    setSelectedOrder(null);
+  }, []);
+  
+  const handleViewDetails = useMemoizedCallback((order: Order) => {
+    if (onOrderPress) {
+      onOrderPress(order);
+    }
+  }, [onOrderPress]);
 
-  const handleAcceptOrder = async (orderId: string) => {
+  const handleAcceptOrder = useMemoizedCallback(async (orderId: string) => {
     try {
       await acceptOrder(orderId).unwrap();
       Alert.alert('Success', 'Order accepted successfully');
     } catch (error: any) {
       Alert.alert('Error', error?.data?.message || 'Failed to accept order');
     }
-  };
+  }, [acceptOrder]);
 
-  const handleFilterApply = (newFilters: typeof filters) => {
+  const handleFilterApply = useMemoizedCallback((newFilters: typeof filters) => {
     dispatch(setFilters(newFilters));
-  };
+  }, [dispatch]);
 
-  const handleFilterReset = () => {
+  const handleFilterReset = useMemoizedCallback(() => {
     dispatch(setFilters({}));
-  };
+  }, [dispatch]);
 
   if (isLoading && !cachedOrders.length) {
     return (
@@ -351,47 +384,32 @@ export const OrderFeedScreen: React.FC<OrderFeedScreenProps> = ({ onOrderPress }
 
       {/* Content - Map or List */}
       {showMap ? (
-        <OrderMapView orders={filteredOrders} onOrderPress={handleOrderPress} />
+        <>
+          <OrderMapView
+            orders={filteredOrders}
+            onOrderPress={handleOrderPress}
+            selectedOrder={selectedOrder}
+            onShowBottomSheet={() => setBottomSheetVisible(true)}
+          />
+          <OrderBottomSheet
+            visible={bottomSheetVisible}
+            orders={filteredOrders}
+            selectedOrder={selectedOrder}
+            onClose={handleBottomSheetClose}
+            onOrderSelect={handleOrderSelect}
+            onAcceptOrder={handleAcceptOrder}
+            onViewDetails={handleViewDetails}
+          />
+        </>
       ) : (
-        <FlatList
-          data={filteredOrders}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <OrderCard
-              orderId={item.id}
-              clientName={item.client?.name || 'Клиент'}
-              applianceType={item.appliance?.type || 'Техника'}
-              address={item.location?.address || 'Адрес не указан'}
-              distance={item.location?.distance || 0}
-              price={item.price?.amount || 0}
-              status={item.status}
-              urgency={(item.priority as 'low' | 'medium' | 'high') || 'medium'}
-              onPress={() => handleOrderPress(item)}
-              onAccept={() => handleAcceptOrder(item.id)}
-              clientRating={item.client?.rating}
-              clientAvatar={item.client?.avatar}
-              currency={item.price?.currency || 'RUB'}
-            />
-          )}
-          contentContainerStyle={styles.listContent}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyTitle}>Заказы не найдены</Text>
-              <Text style={styles.emptyMessage}>
-                {searchQuery
-                  ? 'Попробуйте изменить параметры поиска или фильтры'
-                  : `Нет доступных заказов со статусом "${activeTab.replace('_', ' ')}"`}
-              </Text>
-            </View>
-          }
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={handleRefresh}
-              tintColor={colors.primary[600]}
-            />
-          }
-          onEndReachedThreshold={0.5}
+        <OptimizedOrdersList
+          orders={filteredOrders}
+          onOrderPress={handleOrderPress}
+          onAcceptOrder={handleAcceptOrder}
+          onRefresh={handleRefresh}
+          isRefreshing={isRefreshing}
+          searchQuery={searchQuery}
+          activeTab={activeTab}
         />
       )}
     </View>

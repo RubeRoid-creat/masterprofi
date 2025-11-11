@@ -6,6 +6,9 @@ export { useOfflineCache } from './useOfflineCache';
 export { useChatStorage } from './useChatStorage';
 export { useChatWebSocket } from './useChatWebSocket';
 export { useAuth } from './useAuth';
+export { useMemoizedCallback, useStableCallback } from './useMemoizedCallback';
+export { useOptimizedList } from './useOptimizedList';
+export { useDebounce, useDebouncedCallback } from './useDebounce';
 
 
 

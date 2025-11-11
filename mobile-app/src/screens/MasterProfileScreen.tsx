@@ -3,7 +3,6 @@ import {
   View,
   ScrollView,
   RefreshControl,
-  ActivityIndicator,
   Text,
   StyleSheet,
   TouchableOpacity,
@@ -19,10 +18,15 @@ import { RatingReviews } from '../components/profile/RatingReviews';
 import { AvailabilityCalendar } from '../components/profile/AvailabilityCalendar';
 import { Statistics } from '../components/profile/Statistics';
 import { CertificatesDisplay } from '../components/profile/CertificatesDisplay';
-import { colors, typography, spacing } from '../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../theme';
 import { useAppSelector } from '../store/hooks';
 import { useGetCurrentUserQuery } from '../store/api/authApi';
 import { ProfileStackParamList } from '../navigation/types';
+import { ModernCard } from '../components/common/ModernCard';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { Alert } from '../components/ui/Alert';
+import { StyledButton } from '../components/common/StyledButton';
+import { useUpdateProfileMutation } from '../store/api/authApi';
 
 type ProfileScreenNavigationProp = NativeStackNavigationProp<ProfileStackParamList>;
 
@@ -38,6 +42,9 @@ export const MasterProfileScreen: React.FC<MasterProfileScreenProps> = ({
   onProfileUpdate,
 }) => {
   const [refreshing, setRefreshing] = useState(false);
+  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
+  const scrollViewRef = React.useRef<ScrollView>(null);
+  const personalInfoYPosition = React.useRef<number>(0);
   const navigation = useNavigation<ProfileScreenNavigationProp>();
 
   // Get current user ID from Redux store
@@ -49,6 +56,9 @@ export const MasterProfileScreen: React.FC<MasterProfileScreenProps> = ({
     undefined,
     { skip: !!propsProfile || !profileId }
   );
+
+  // Update profile mutation
+  const [updateProfileMutation, { isLoading: isUpdatingProfile }] = useUpdateProfileMutation();
 
   // Create default profile structure
   const createDefaultProfile = (user: any): MasterProfile => ({
@@ -145,18 +155,40 @@ export const MasterProfileScreen: React.FC<MasterProfileScreenProps> = ({
   };
 
   const updateProfile = async (updates: Partial<MasterProfile>) => {
-    setLocalUpdates((prev) => ({ ...prev, ...updates }));
-    if (profile) {
-      const updated = { ...profile, ...updates };
-      onProfileUpdate?.(updated);
+    try {
+      // If updating personal info, also update via API
+      if (updates.personalInfo) {
+        const personalInfo = updates.personalInfo;
+        await updateProfileMutation({
+          firstName: personalInfo.firstName,
+          lastName: personalInfo.lastName,
+          email: personalInfo.email,
+          phone: personalInfo.phone,
+          avatar: personalInfo.avatar,
+          city: personalInfo.city,
+          bio: personalInfo.bio,
+        }).unwrap();
+        
+        // Refetch user data to get latest from server
+        await refetchUser();
+      }
+
+      // Update local state
+      setLocalUpdates((prev) => ({ ...prev, ...updates }));
+      if (profile) {
+        const updated = { ...profile, ...updates };
+        onProfileUpdate?.(updated);
+      }
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      throw error;
     }
   };
 
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary[600]} />
-        <Text style={styles.loadingText}>Загрузка профиля...</Text>
+        <LoadingSpinner size="large" text="Загрузка профиля..." />
       </View>
     );
   }
@@ -164,84 +196,206 @@ export const MasterProfileScreen: React.FC<MasterProfileScreenProps> = ({
   if (!profile) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Профиль не найден</Text>
+        <Alert
+          variant="error"
+          title="Ошибка"
+          message="Профиль не найден"
+          showIcon={true}
+        />
       </View>
     );
   }
 
   return (
     <ScrollView
+      ref={scrollViewRef}
       style={styles.container}
       contentContainerStyle={styles.content}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        <RefreshControl 
+          refreshing={refreshing} 
+          onRefresh={handleRefresh}
+          tintColor={colors.primary[600]}
+        />
       }
+      showsVerticalScrollIndicator={false}
     >
-      {/* Personal Information */}
-      <PersonalInfoEditor
-        personalInfo={profile.personalInfo}
-        onSave={async (info) => {
-          await updateProfile({ personalInfo: info });
-        }}
-      />
+      {/* Profile Header Card */}
+      <ModernCard variant="elevated" padding="large" style={styles.headerCard}>
+        <View style={styles.headerTopRow}>
+          <View style={styles.headerContent}>
+            <View style={styles.avatarContainer}>
+              {profile.personalInfo.avatar ? (
+                <View style={styles.avatarWrapper}>
+                  <Text style={styles.avatarPlaceholder}>
+                    {profile.personalInfo.firstName?.[0] || 'U'}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.avatarPlaceholderContainer}>
+                  <Text style={styles.avatarPlaceholderText}>
+                    {profile.personalInfo.firstName?.[0] || 'U'}
+                    {profile.personalInfo.lastName?.[0] || ''}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.headerInfo}>
+              <Text style={styles.profileName}>
+                {profile.personalInfo.firstName} {profile.personalInfo.lastName}
+              </Text>
+              {profile.personalInfo.city && (
+                <View style={styles.locationRow}>
+                  <Text style={styles.locationIcon}>📍</Text>
+                  <Text style={styles.locationText}>{profile.personalInfo.city}</Text>
+                </View>
+              )}
+              {profile.rating.average > 0 && (
+                <View style={styles.ratingRow}>
+                  <Text style={styles.ratingIcon}>⭐</Text>
+                  <Text style={styles.ratingText}>
+                    {profile.rating.average.toFixed(1)} ({profile.rating.total} отзывов)
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+          <TouchableOpacity
+            style={styles.editHeaderButton}
+            onPress={() => {
+              setIsEditingPersonalInfo(true);
+              // Scroll to personal info section after a short delay
+              setTimeout(() => {
+                if (scrollViewRef.current && personalInfoYPosition.current > 0) {
+                  scrollViewRef.current.scrollTo({
+                    y: personalInfoYPosition.current - spacing.lg,
+                    animated: true,
+                  });
+                }
+              }, 300);
+            }}
+          >
+            <Text style={styles.editHeaderIcon}>✏️</Text>
+          </TouchableOpacity>
+        </View>
+        {profile.personalInfo.bio && (
+          <Text style={styles.bioText}>{profile.personalInfo.bio}</Text>
+        )}
+      </ModernCard>
 
       {/* Statistics */}
-      <Statistics statistics={profile.statistics} />
+      <View style={styles.section}>
+        <Statistics statistics={profile.statistics} />
+      </View>
+
+      {/* Personal Information */}
+      <View
+        style={styles.section}
+        onLayout={(event) => {
+          personalInfoYPosition.current = event.nativeEvent.layout.y;
+        }}
+      >
+        <PersonalInfoEditor
+          personalInfo={profile.personalInfo}
+          onSave={async (info) => {
+            await updateProfile({ personalInfo: info });
+          }}
+          showHeader={true}
+          isEditing={isEditingPersonalInfo}
+          onEditToggle={setIsEditingPersonalInfo}
+        />
+      </View>
 
       {/* Rating & Reviews */}
-      <RatingReviews rating={profile.rating} reviews={profile.reviews} />
+      <View style={styles.section}>
+        <RatingReviews rating={profile.rating} reviews={profile.reviews} />
+      </View>
 
       {/* Skills & Specialties */}
-      <SkillsManager
-        skills={profile.skills}
-        onSkillsChange={async (skills) => {
-          await updateProfile({ skills });
-        }}
-      />
+      <View style={styles.section}>
+        <ModernCard variant="flat" padding="medium" style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Навыки и специализация</Text>
+          <SkillsManager
+            skills={profile.skills}
+            onSkillsChange={async (skills) => {
+              await updateProfile({ skills });
+            }}
+          />
+        </ModernCard>
+      </View>
 
       {/* Service Area */}
-      <ServiceAreaConfig
-        serviceArea={profile.serviceArea}
-        onSave={async (area) => {
-          await updateProfile({ serviceArea: area });
-        }}
-      />
+      <View style={styles.section}>
+        <ModernCard variant="flat" padding="medium" style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Зона обслуживания</Text>
+          <ServiceAreaConfig
+            serviceArea={profile.serviceArea}
+            onSave={async (area) => {
+              await updateProfile({ serviceArea: area });
+            }}
+          />
+        </ModernCard>
+      </View>
 
       {/* Portfolio */}
-      <PortfolioGallery
-        portfolio={profile.portfolio}
-        onPortfolioChange={async (portfolio) => {
-          await updateProfile({ portfolio });
-        }}
-      />
+      <View style={styles.section}>
+        <ModernCard variant="flat" padding="medium" style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Портфолио</Text>
+          <PortfolioGallery
+            portfolio={profile.portfolio}
+            onPortfolioChange={async (portfolio) => {
+              await updateProfile({ portfolio });
+            }}
+          />
+        </ModernCard>
+      </View>
 
       {/* Certificates */}
-      <CertificatesDisplay
-        certificates={profile.certificates}
-        onAdd={() => {
-          // Navigate to add certificate screen
-        }}
-      />
+      <View style={styles.section}>
+        <ModernCard variant="flat" padding="medium" style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Сертификаты</Text>
+          <CertificatesDisplay
+            certificates={profile.certificates}
+            onAdd={() => {
+              // Navigate to add certificate screen
+            }}
+          />
+        </ModernCard>
+      </View>
 
       {/* Availability */}
-      <AvailabilityCalendar
-        availability={profile.availability}
-        onSave={async (availability) => {
-          await updateProfile({ availability });
-        }}
-      />
+      <View style={styles.section}>
+        <ModernCard variant="flat" padding="medium" style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Доступность</Text>
+          <AvailabilityCalendar
+            availability={profile.availability}
+            onSave={async (availability) => {
+              await updateProfile({ availability });
+            }}
+          />
+        </ModernCard>
+      </View>
 
       {/* CRM Sync Section */}
       <View style={styles.section}>
-        <TouchableOpacity
-          style={styles.crmSyncButton}
-          onPress={() => navigation.navigate('CrmSync')}
-        >
-          <Text style={styles.crmSyncButtonText}>🔄 Синхронизация CRM</Text>
-          <Text style={styles.crmSyncButtonSubtext}>
-            Синхронизация данных с админ-панелью
-          </Text>
-        </TouchableOpacity>
+        <ModernCard variant="elevated" padding="medium" style={styles.crmSyncCard}>
+          <View style={styles.crmSyncContent}>
+            <Text style={styles.crmSyncIcon}>🔄</Text>
+            <View style={styles.crmSyncTextContainer}>
+              <Text style={styles.crmSyncTitle}>Синхронизация CRM</Text>
+              <Text style={styles.crmSyncSubtitle}>
+                Синхронизация данных с админ-панелью
+              </Text>
+            </View>
+          </View>
+          <StyledButton
+            title="Открыть"
+            onPress={() => navigation.navigate('CrmSync')}
+            variant="primary"
+            size="medium"
+            fullWidth={true}
+          />
+        </ModernCard>
       </View>
     </ScrollView>
   );
@@ -253,7 +407,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
   },
   content: {
-    padding: spacing.lg,
+    padding: spacing.md,
+    paddingBottom: spacing['2xl'],
   },
   loadingContainer: {
     flex: 1,
@@ -261,45 +416,154 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.background.primary,
   },
-  loadingText: {
-    ...typography.body.medium,
-    color: colors.text.secondary,
-    marginTop: spacing.md,
-  },
   errorContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.background.primary,
+    padding: spacing.xl,
   },
-  errorText: {
-    ...typography.heading.h3,
-    color: colors.text.primary,
+  headerCard: {
+    marginBottom: spacing.lg,
   },
-  section: {
-    marginTop: spacing.lg,
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
     marginBottom: spacing.md,
   },
-  crmSyncButton: {
-    backgroundColor: colors.primary[600],
-    borderRadius: 12,
-    padding: spacing.lg,
-    alignItems: 'center',
-    shadowColor: colors.gray[900],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    flex: 1,
   },
-  crmSyncButtonText: {
-    ...typography.heading.h4,
-    color: colors.white,
+  editHeaderButton: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+  },
+  editHeaderIcon: {
+    fontSize: 20,
+  },
+  avatarContainer: {
+    marginRight: spacing.lg,
+  },
+  avatarWrapper: {
+    width: 80,
+    height: 80,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary[100],
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: colors.primary[300],
+  },
+  avatarPlaceholder: {
+    ...typography.heading.h2,
+    color: colors.primary[700],
+    fontWeight: '700',
+  },
+  avatarPlaceholderContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary[600],
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.md,
+  },
+  avatarPlaceholderText: {
+    ...typography.heading.h2,
+    color: colors.text.inverse,
+    fontWeight: '700',
+  },
+  headerInfo: {
+    flex: 1,
+  },
+  profileName: {
+    ...typography.heading.h2,
+    color: colors.text.primary,
+    fontWeight: '700',
+    marginBottom: spacing.sm,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: spacing.xs,
   },
-  crmSyncButtonSubtext: {
+  locationIcon: {
+    fontSize: 16,
+    marginRight: spacing.xs,
+  },
+  locationText: {
+    ...typography.body.medium,
+    color: colors.text.secondary,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingIcon: {
+    fontSize: 16,
+    marginRight: spacing.xs,
+  },
+  ratingText: {
+    ...typography.body.medium,
+    color: colors.text.secondary,
+    fontWeight: '600',
+  },
+  bioText: {
+    ...typography.body.medium,
+    color: colors.text.secondary,
+    lineHeight: 22,
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+  },
+  section: {
+    marginBottom: spacing.lg,
+  },
+  sectionCard: {
+    marginBottom: 0,
+  },
+  sectionTitle: {
+    ...typography.heading.h3,
+    color: colors.text.primary,
+    fontWeight: '700',
+    marginBottom: spacing.md,
+  },
+  crmSyncCard: {
+    backgroundColor: colors.primary[50],
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+  },
+  crmSyncContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  crmSyncIcon: {
+    fontSize: 32,
+    marginRight: spacing.md,
+  },
+  crmSyncTextContainer: {
+    flex: 1,
+  },
+  crmSyncTitle: {
+    ...typography.heading.h4,
+    color: colors.text.primary,
+    fontWeight: '700',
+    marginBottom: spacing.xs,
+  },
+  crmSyncSubtitle: {
     ...typography.body.small,
-    color: colors.white,
-    opacity: 0.9,
+    color: colors.text.secondary,
   },
 });
 

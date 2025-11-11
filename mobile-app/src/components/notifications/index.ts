@@ -1,10 +1,5 @@
-export { NotificationPreferencesScreen } from './NotificationPreferences';
-export { NotificationHistory } from './NotificationHistory';
+/**
+ * Notification Components Index
+ */
 
-
-
-
-
-
-
-
+export { NotificationGroup, type NotificationGroupProps, type NotificationItem } from './NotificationGroup';

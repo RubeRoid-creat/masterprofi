@@ -501,7 +501,8 @@ class DatabaseSyncService {
     tableName: string,
     localId: string,
     serverData: any,
-    strategy: ConflictResolution['strategy'] = 'server_wins'
+    strategy: ConflictResolution['strategy'] = 'server_wins',
+    customResolver?: ConflictResolution['resolve']
   ): Promise<void> {
     if (!database) {
       throw new Error('Database is not available');
@@ -516,6 +517,7 @@ class DatabaseSyncService {
         await record.update((r: any) => {
           Object.assign(r, this.deserializeRecord(serverData, tableName));
           r.isSynced = true;
+          r.syncStatus = 'synced';
         });
       } else if (strategy === 'local_wins') {
         // Keep local changes, but update sync status
@@ -524,9 +526,76 @@ class DatabaseSyncService {
           r.isSynced = false;
           r.syncStatus = 'pending';
         });
+      } else if (strategy === 'merge' && customResolver) {
+        // Merge local and server data using custom resolver
+        const localData = this.serializeRecord(record);
+        const merged = customResolver(localData, serverData);
+        await record.update((r: any) => {
+          Object.assign(r, this.deserializeRecord(merged, tableName));
+          r.isSynced = true;
+          r.syncStatus = 'synced';
+        });
+      } else if (strategy === 'manual') {
+        // Mark as conflict for manual resolution
+        await record.update((r: any) => {
+          r.syncStatus = 'conflict';
+          r.conflictData = JSON.stringify(serverData);
+        });
       }
-      // Add merge and manual strategies as needed
     });
+  }
+
+  /**
+   * Get sync statistics
+   */
+  async getSyncStats(): Promise<{
+    isSyncing: boolean;
+    lastSyncTime: Date | null;
+    pendingCount: number;
+    errorCount: number;
+  }> {
+    if (!database) {
+      return {
+        isSyncing: false,
+        lastSyncTime: null,
+        pendingCount: 0,
+        errorCount: 0,
+      };
+    }
+
+    try {
+      const collection = database.collections.get('sync_status');
+      const statuses = await collection.query().fetch();
+      
+      let lastSyncTime: number = 0;
+      let pendingCount = 0;
+      let errorCount = 0;
+
+      for (const status of statuses) {
+        if (status.lastSyncedAt > lastSyncTime) {
+          lastSyncTime = status.lastSyncedAt;
+        }
+        pendingCount += status.pendingChanges || 0;
+        if (status.syncError) {
+          errorCount++;
+        }
+      }
+
+      return {
+        isSyncing: this.isSyncing,
+        lastSyncTime: lastSyncTime > 0 ? new Date(lastSyncTime) : null,
+        pendingCount,
+        errorCount,
+      };
+    } catch (error) {
+      console.error('Error getting sync stats:', error);
+      return {
+        isSyncing: false,
+        lastSyncTime: null,
+        pendingCount: 0,
+        errorCount: 0,
+      };
+    }
   }
 }
 

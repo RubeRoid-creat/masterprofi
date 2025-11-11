@@ -7,7 +7,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import MapView, { Marker, Region, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Order } from '../../types/order';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
 import { Badge } from '../ui/Badge';
 
 interface OrderMapViewProps {
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 3,
     borderColor: colors.background.primary,
-    ...typography.shadows.small,
+    ...shadows.small,
   },
   markerBadge: {
     position: 'absolute',
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: borderRadius.md,
-    ...typography.shadows.small,
+    ...shadows.small,
   },
   markerBadgeText: {
     ...typography.body.small,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    ...typography.shadows.medium,
+    ...shadows.medium,
   },
   centerButtonText: {
     fontSize: 24,
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    ...typography.shadows.medium,
+    ...shadows.medium,
   },
   bottomSheetButtonText: {
     fontSize: 24,

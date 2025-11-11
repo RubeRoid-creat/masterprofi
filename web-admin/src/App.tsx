@@ -43,55 +43,55 @@ function AppContent() {
       />
       <Route
         path="/dashboard"
-        element={auth.isAuthenticated ? <Layout currentPage="dashboard"><Dashboard /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><Dashboard /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/users"
-        element={auth.isAuthenticated ? <Layout currentPage="users"><Users /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><Users /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/orders"
-        element={auth.isAuthenticated ? <Layout currentPage="orders"><Orders /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><Orders /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/payments"
-        element={auth.isAuthenticated ? <Layout currentPage="payments"><Payments /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><Payments /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/mlm"
-        element={auth.isAuthenticated ? <Layout currentPage="mlm"><MLM /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><MLM /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/reports"
-        element={auth.isAuthenticated ? <Layout currentPage="reports"><Reports /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><Reports /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/profile"
-        element={auth.isAuthenticated ? <Layout currentPage="profile"><Profile /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><Profile /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/schedule"
-        element={auth.isAuthenticated ? <Layout currentPage="schedule"><Schedule /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><Schedule /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/crm/sync"
-        element={auth.isAuthenticated ? <Layout currentPage="crm"><CrmSync /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><CrmSync /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/crm/customers"
-        element={auth.isAuthenticated ? <Layout currentPage="customers"><CustomersPage /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><CustomersPage /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/crm/orders/kanban"
-        element={auth.isAuthenticated ? <Layout currentPage="orders"><KanbanBoard /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><KanbanBoard /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/crm/masters"
-        element={auth.isAuthenticated ? <Layout currentPage="masters"><MastersPage /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><MastersPage /></Layout> : <Navigate to="/login" />}
       />
       <Route
         path="/crm/finance"
-        element={auth.isAuthenticated ? <Layout currentPage="finance"><FinanceDashboard /></Layout> : <Navigate to="/login" />}
+        element={auth.isAuthenticated ? <Layout><FinanceDashboard /></Layout> : <Navigate to="/login" />}
       />
       <Route path="/" element={<Navigate to="/dashboard" />} />
     </Routes>

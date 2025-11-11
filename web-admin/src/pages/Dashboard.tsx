@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Cart
 import { statsAPI, usersAPI, ordersAPI, paymentsAPI } from "../services/api";
 import { useTranslation } from "react-i18next";
 import { useDataSync } from "../hooks/useDataSync";
+import { StatCard, Card, Button } from "../components/ui";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -499,174 +500,91 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("dashboard.users")}</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-                  {loading ? "..." : stats.users}
-                </p>
-              </div>
-              <div className="bg-blue-100 dark:bg-blue-900 rounded-full p-3">
-                <svg
-                  className="w-8 h-8 text-blue-600 dark:text-blue-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 animate-fade-in">
+          <StatCard
+            title={t("dashboard.users")}
+            value={loading ? 0 : stats.users}
+            variant="primary"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            }
+            className="animate-slide-up"
+            style={{ animationDelay: '0.1s' }}
+          />
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Заказы</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-                  {loading ? "..." : stats.orders}
-                </p>
-              </div>
-              <div className="bg-green-100 dark:bg-green-900 rounded-full p-3">
-                <svg
-                  className="w-8 h-8 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            title="Заказы"
+            value={loading ? 0 : stats.orders}
+            variant="success"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            }
+            className="animate-slide-up"
+            style={{ animationDelay: '0.2s' }}
+          />
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Мастера</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-                  {loading ? "..." : stats.masters}
-                </p>
-              </div>
-              <div className="bg-purple-100 dark:bg-purple-900 rounded-full p-3">
-                <svg
-                  className="w-8 h-8 text-purple-600 dark:text-purple-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            title="Мастера"
+            value={loading ? 0 : stats.masters}
+            variant="secondary"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            }
+            className="animate-slide-up"
+            style={{ animationDelay: '0.3s' }}
+          />
 
-          {/* Доходы */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Доходы</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-                  {loading ? "..." : `${Math.round(stats.revenue).toLocaleString('ru-RU')} ₽`}
-                </p>
-              </div>
-              <div className="bg-green-100 dark:bg-green-900 rounded-full p-3">
-                <svg
-                  className="w-8 h-8 text-green-600 dark:text-green-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            title="Доходы"
+            value={loading ? "0 ₽" : `${Math.round(stats.revenue).toLocaleString('ru-RU')} ₽`}
+            variant="success"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            }
+            className="animate-slide-up"
+            style={{ animationDelay: '0.4s' }}
+          />
 
-          {/* Средний чек */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Средний чек</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-                  {loading ? "..." : `${Math.round(stats.averageCheck).toLocaleString('ru-RU')} ₽`}
-                </p>
-              </div>
-              <div className="bg-yellow-100 dark:bg-yellow-900 rounded-full p-3">
-                <svg
-                  className="w-8 h-8 text-yellow-600 dark:text-yellow-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            title="Средний чек"
+            value={loading ? "0 ₽" : `${Math.round(stats.averageCheck).toLocaleString('ru-RU')} ₽`}
+            variant="warning"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            }
+            className="animate-slide-up"
+            style={{ animationDelay: '0.5s' }}
+          />
 
-          {/* Конверсия */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Конверсия</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-                  {loading ? "..." : `${stats.conversion.toFixed(1)}%`}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Завершено заказов
-                </p>
-              </div>
-              <div className="bg-indigo-100 dark:bg-indigo-900 rounded-full p-3">
-                <svg
-                  className="w-8 h-8 text-indigo-600 dark:text-indigo-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            title="Конверсия"
+            value={loading ? "0%" : `${stats.conversion.toFixed(1)}%`}
+            subtitle="Завершено заказов"
+            variant="primary"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            }
+            className="animate-slide-up"
+            style={{ animationDelay: '0.6s' }}
+          />
         </div>
 
         {/* Графики */}
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
           {/* График доходов по периодам */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <Card variant="elevated" padding="lg" className="animate-slide-up">
             <h3 className="text-xl font-bold text-gray-900 mb-4">
               Доходы по периодам
             </h3>
@@ -694,9 +612,9 @@ export default function Dashboard() {
                 <p className="text-gray-600">Нет данных для отображения</p>
               </div>
             )}
-          </div>
+          </Card>
           {/* Круговая диаграмма ролей */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <Card variant="elevated" padding="lg" className="animate-slide-up">
             <h3 className="text-xl font-bold text-gray-900 mb-4">
               Распределение пользователей
             </h3>
@@ -725,10 +643,10 @@ export default function Dashboard() {
                 <p className="text-gray-600">Нет данных для отображения</p>
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Столбчатая диаграмма статусов заказов */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <Card variant="elevated" padding="lg" className="animate-slide-up">
             <h3 className="text-xl font-bold text-gray-900 mb-4">
               Статусы заказов
             </h3>
@@ -752,7 +670,7 @@ export default function Dashboard() {
         </div>
 
         {/* Статистика по мастерам */}
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
+        <Card variant="elevated" padding="lg" className="mt-8 animate-slide-up">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
             Топ мастера по доходам
           </h3>
@@ -817,10 +735,10 @@ export default function Dashboard() {
               <p className="text-gray-600">Нет данных о мастерах</p>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Quick Actions */}
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
+        <Card variant="elevated" padding="lg" className="mt-8 animate-slide-up">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
             Быстрые действия
           </h3>
@@ -894,7 +812,7 @@ export default function Dashboard() {
               </div>
             </button>
           </div>
-        </div>
+        </Card>
     </div>
   );
 }

@@ -1,6 +1,7 @@
-import { HTMLAttributes, ReactNode, useState } from 'react';
+import { useState } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '../../utils/cn';
-import { Button } from './Button';
+import Button from './Button';
 
 export interface SidebarItem {
   label: string;

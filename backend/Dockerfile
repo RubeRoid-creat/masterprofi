@@ -23,7 +23,7 @@ FROM node:20-slim AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
-COPY nest-cli.json tsconfig.json tsconfig.build.json* ./ 2>/dev/null || true
+COPY nest-cli.json tsconfig.json ./
 COPY src ./src
 COPY ormconfig.ts ./
 RUN npm run build

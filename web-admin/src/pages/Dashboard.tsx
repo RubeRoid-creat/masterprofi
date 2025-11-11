@@ -667,6 +667,7 @@ export default function Dashboard() {
               </div>
             )}
           </Card>
+        </div>
 
         {/* Статистика по мастерам */}
         <Card variant="elevated" padding="lg" className="mt-8 animate-slide-up">

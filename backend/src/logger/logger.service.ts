@@ -1,7 +1,8 @@
 import { Injectable, LoggerService as NestLoggerService } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as winston from "winston";
-import * as DailyRotateFile from "winston-daily-rotate-file";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const DailyRotateFile = require("winston-daily-rotate-file");
 import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
 
@@ -64,7 +65,7 @@ export class LoggerService implements NestLoggerService {
     if (this.configService.get<string>("ENABLE_FILE_LOGGING") === "true" || !isDevelopment) {
       // Общий лог
       transports.push(
-        new (DailyRotateFile as any)({
+        new DailyRotateFile({
           dirname: this.logDir,
           filename: "application-%DATE%.log",
           datePattern: "YYYY-MM-DD",
@@ -78,7 +79,7 @@ export class LoggerService implements NestLoggerService {
 
       // Лог ошибок
       transports.push(
-        new (DailyRotateFile as any)({
+        new DailyRotateFile({
           dirname: this.logDir,
           filename: "error-%DATE%.log",
           datePattern: "YYYY-MM-DD",
@@ -92,7 +93,7 @@ export class LoggerService implements NestLoggerService {
 
       // Лог HTTP запросов
       transports.push(
-        new (DailyRotateFile as any)({
+        new DailyRotateFile({
           dirname: this.logDir,
           filename: "http-%DATE%.log",
           datePattern: "YYYY-MM-DD",

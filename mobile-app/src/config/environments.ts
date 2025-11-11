@@ -49,14 +49,17 @@ const getLocalhostUrl = (): string => {
     return process.env.EXPO_PUBLIC_API_URL_DEV;
   }
 
-  // For Android emulator, use 10.0.2.2 (special alias to host machine)
-  if (Platform.OS === 'android') {
-    // Check if running on emulator (you can also check for specific device IDs)
-    return 'http://10.0.2.2:3000/api';
-  }
+  // По умолчанию используем production сервер для development
+  // Это позволяет тестировать мобильное приложение без локального backend
+  return 'http://212.74.227.208:3000/api';
 
+  // Для локальной разработки раскомментируйте:
+  // For Android emulator, use 10.0.2.2 (special alias to host machine)
+  // if (Platform.OS === 'android') {
+  //   return 'http://10.0.2.2:3000/api';
+  // }
   // For iOS simulator and web, use localhost
-  return 'http://localhost:3000/api';
+  // return 'http://localhost:3000/api';
 };
 
 const getLocalhostWsUrl = (): string => {
@@ -65,13 +68,16 @@ const getLocalhostWsUrl = (): string => {
     return process.env.EXPO_PUBLIC_WS_URL_DEV;
   }
 
-  // For Android emulator, use 10.0.2.2
-  if (Platform.OS === 'android') {
-    return 'ws://10.0.2.2:3000';
-  }
+  // По умолчанию используем production сервер для development
+  return 'ws://212.74.227.208:3000';
 
+  // Для локальной разработки раскомментируйте:
+  // For Android emulator, use 10.0.2.2
+  // if (Platform.OS === 'android') {
+  //   return 'ws://10.0.2.2:3000';
+  // }
   // For iOS simulator and web, use localhost
-  return 'ws://localhost:3000';
+  // return 'ws://localhost:3000';
 };
 
 // Environment-specific configurations

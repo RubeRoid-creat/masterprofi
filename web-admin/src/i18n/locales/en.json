@@ -1,0 +1,165 @@
+{
+  "common": {
+    "appName": "MasterProfi",
+    "adminPanel": "Administrative Panel",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "apply": "Apply",
+    "reset": "Reset",
+    "noData": "No data",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "loginError": "Authorization error",
+    "useAdminCredentials": "Use administrator credentials",
+    "loggingIn": "Logging in..."
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "orders": "Orders",
+    "payments": "Payments",
+    "mlm": "MLM System",
+    "reports": "Reports",
+    "profile": "Profile"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "MasterProfi system overview",
+    "users": "Users",
+    "orders": "Orders",
+    "masters": "Masters",
+    "revenue": "Revenue",
+    "averageCheck": "Average check",
+    "conversion": "Conversion",
+    "completedOrders": "Completed orders",
+    "quickReports": "Quick Reports",
+    "ordersReport": "Orders Report",
+    "ordersReportDesc": "Statistics and details",
+    "mlmReport": "MLM Report",
+    "mlmReportDesc": "Commissions and structure",
+    "financialReport": "Financial Report",
+    "financialReportDesc": "Revenue and payments",
+    "period": {
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "createUser": "Create user",
+    "editUser": "Edit user",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "phone": "Phone",
+    "role": "Role",
+    "roles": {
+      "client": "Client",
+      "master": "Master",
+      "admin": "Administrator"
+    },
+    "isActive": "Active",
+    "createdAt": "Created at",
+    "actions": "Actions",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required when creating"
+  },
+  "orders": {
+    "title": "Orders",
+    "createOrder": "Create order",
+    "editOrder": "Edit order",
+    "client": "Client",
+    "master": "Master",
+    "noMaster": "No master",
+    "selectClient": "Select client",
+    "status": "Status",
+    "statuses": {
+      "created": "Created",
+      "assigned": "Assigned",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "description": "Description",
+    "descriptionPlaceholder": "Describe order details...",
+    "amount": "Amount (₽)",
+    "totalAmount": "Total amount",
+    "history": "Change history",
+    "clientRequired": "Client is required"
+  },
+  "payments": {
+    "title": "Payments",
+    "status": "Status",
+    "amount": "Amount",
+    "date": "Date",
+    "statuses": {
+      "pending": "Pending",
+      "completed": "Completed",
+      "failed": "Failed"
+    }
+  },
+  "mlm": {
+    "title": "MLM System",
+    "description": "Partner program and analytics",
+    "yourStats": "Your statistics",
+    "referrals": "Referrals",
+    "earned": "Earned",
+    "available": "Available",
+    "withdrawn": "Withdrawn",
+    "commissionLevels": "Commission levels",
+    "level": "Level",
+    "rate": "Rate",
+    "structure": "Structure",
+    "ordersCount": "Orders",
+    "loadError": "Error loading MLM data"
+  },
+  "reports": {
+    "title": "Reports",
+    "generateReport": "Generate report",
+    "ordersReport": "Orders Report",
+    "mlmReport": "MLM Report",
+    "financialReport": "Financial Report",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "status": "Status",
+    "generating": "Generating..."
+  },
+  "profile": {
+    "title": "Profile",
+    "editProfile": "Edit profile",
+    "changePassword": "Change password",
+    "activityHistory": "Activity history",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "passwordChanged": "Password successfully changed",
+    "profileUpdated": "Profile successfully updated",
+    "passwordMismatch": "Passwords do not match"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": {
+    "toggle": "Toggle language",
+    "russian": "Русский",
+    "english": "English"
+  }
+}
+
+
+

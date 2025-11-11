@@ -1,0 +1,99 @@
+# MasterProfi Cursor AI Configuration
+
+## Project Context
+Project: "MasterProfi Service Platform"
+Type: Multi-service SaaS Platform
+Stack: MERN + Python + React Native
+Team: 4-6 developers
+
+## Code Style
+- Indentation: 2 spaces
+- Semicolons: true
+- Single quotes: false (use double quotes in TypeScript/JS)
+- Trailing commas: es5
+- Max line length: 120
+
+## Architecture Preferences
+
+### Backend (NestJS)
+- Modular architecture with services
+- Repository pattern for database
+- DTOs with class-validator
+- Custom decorators for validation
+- Guards for authentication/authorization
+- Interceptors for logging and transformation
+- Filters for error handling
+- Swagger documentation
+
+### Frontend (React)
+- Functional components with hooks
+- TypeScript strict mode
+- Redux Toolkit for state
+- RTK Query for API calls
+- Tailwind CSS for styling
+- React Hook Form for forms
+- React.lazy for code splitting
+
+### Database
+- PostgreSQL with TypeORM
+- Repository pattern
+- Proper indexes
+- Soft deletes
+- Audit fields
+- Migration-based schema
+
+## Testing Requirements
+- Unit tests: Jest
+- E2E tests: Cypress
+- Coverage threshold: 80%
+- Mock external services
+- Test factories for data
+
+## Domain Knowledge
+
+### Business
+- MLM for service professionals
+- Home appliance repair industry
+- Russian market specifics
+- Payment: YooKassa, Sberbank
+
+### Technical Constraints
+- Cyrillic support
+- Russian phone formats
+- Russian address system
+- Local tax requirements
+- GDPR compliance
+
+## Code Generation Patterns
+
+### When generating API endpoints:
+1. Input validation with class-validator
+2. Error handling with custom exceptions
+3. Logging with correlation IDs
+4. Standardized responses
+5. Swagger docs
+
+### When generating React components:
+1. Functional components with TypeScript
+2. Redux for state
+3. Tailwind CSS
+4. React Hook Form
+5. React Query for fetching
+
+### Security
+- Rate limiting on auth
+- Password policies
+- Session management
+- 2FA readiness
+- XSS protection
+- SQL injection prevention
+
+## Performance
+- Database indexing
+- Query optimization
+- Pagination
+- Caching strategy
+- Lazy loading
+- Code splitting
+- Bundle optimization
+

@@ -1,0 +1,12 @@
+# ... existing code ...
+
+# Migrations (optional - можно закоммитить миграции, но не обязательно)
+# migrations/
+
+# Logs
+logs/
+*.log
+
+# Coverage
+coverage/
+

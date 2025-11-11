@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: masterprofi_postgres
+    environment:
+      POSTGRES_USER: masterprofi
+      POSTGRES_PASSWORD: MasterProfi2024!Secure
+      POSTGRES_DB: masterprofi
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - masterprofi_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U masterprofi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: masterprofi_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - masterprofi_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: masterprofi_backend
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://masterprofi:MasterProfi2024!Secure@postgres:5432/masterprofi
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key}
+      JWT_EXPIRES_IN: 1h
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      YOOKASSA_SHOP_ID: ${YOOKASSA_SHOP_ID}
+      YOOKASSA_SECRET_KEY: ${YOOKASSA_SECRET_KEY}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - masterprofi_network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  web-admin:
+    build:
+      context: ./web-admin
+      dockerfile: Dockerfile
+    container_name: masterprofi_web_admin
+    environment:
+      REACT_APP_API_URL: http://localhost:3000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - masterprofi_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  masterprofi_network:
+    driver: bridge
+

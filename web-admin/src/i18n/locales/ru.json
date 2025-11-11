@@ -1,0 +1,165 @@
+{
+  "common": {
+    "appName": "MasterProfi",
+    "adminPanel": "Административная панель",
+    "loading": "Загрузка...",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "create": "Создать",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "close": "Закрыть",
+    "search": "Поиск",
+    "filter": "Фильтр",
+    "apply": "Применить",
+    "reset": "Сбросить",
+    "noData": "Нет данных",
+    "error": "Ошибка",
+    "success": "Успешно"
+  },
+  "auth": {
+    "login": "Войти",
+    "logout": "Выйти",
+    "email": "Email",
+    "password": "Пароль",
+    "loginError": "Ошибка авторизации",
+    "useAdminCredentials": "Используйте учетные данные администратора",
+    "loggingIn": "Вход..."
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "users": "Пользователи",
+    "orders": "Заказы",
+    "payments": "Платежи",
+    "mlm": "MLM Система",
+    "reports": "Отчеты",
+    "profile": "Профиль"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Обзор системы MasterProfi",
+    "users": "Пользователи",
+    "orders": "Заказы",
+    "masters": "Мастера",
+    "revenue": "Доходы",
+    "averageCheck": "Средний чек",
+    "conversion": "Конверсия",
+    "completedOrders": "Завершено заказов",
+    "quickReports": "Быстрые отчеты",
+    "ordersReport": "Отчет по заказам",
+    "ordersReportDesc": "Статистика и детали",
+    "mlmReport": "Отчет по MLM",
+    "mlmReportDesc": "Комиссии и структура",
+    "financialReport": "Финансовый отчет",
+    "financialReportDesc": "Доходы и платежи",
+    "period": {
+      "week": "Неделя",
+      "month": "Месяц",
+      "year": "Год"
+    }
+  },
+  "users": {
+    "title": "Пользователи",
+    "createUser": "Создать пользователя",
+    "editUser": "Редактировать пользователя",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "phone": "Телефон",
+    "role": "Роль",
+    "roles": {
+      "client": "Клиент",
+      "master": "Мастер",
+      "admin": "Администратор"
+    },
+    "isActive": "Активен",
+    "createdAt": "Дата создания",
+    "actions": "Действия",
+    "emailRequired": "Email обязателен",
+    "passwordRequired": "Пароль обязателен при создании"
+  },
+  "orders": {
+    "title": "Заказы",
+    "createOrder": "Создать заказ",
+    "editOrder": "Редактировать заказ",
+    "client": "Клиент",
+    "master": "Мастер",
+    "noMaster": "Без мастера",
+    "selectClient": "Выберите клиента",
+    "status": "Статус",
+    "statuses": {
+      "created": "Создан",
+      "assigned": "Назначен",
+      "in_progress": "В работе",
+      "completed": "Завершен",
+      "cancelled": "Отменен"
+    },
+    "description": "Описание",
+    "descriptionPlaceholder": "Опишите детали заказа...",
+    "amount": "Сумма (₽)",
+    "totalAmount": "Общая сумма",
+    "history": "История изменений",
+    "clientRequired": "Клиент обязателен"
+  },
+  "payments": {
+    "title": "Платежи",
+    "status": "Статус",
+    "amount": "Сумма",
+    "date": "Дата",
+    "statuses": {
+      "pending": "Ожидает",
+      "completed": "Завершен",
+      "failed": "Ошибка"
+    }
+  },
+  "mlm": {
+    "title": "MLM Система",
+    "description": "Партнерская программа и аналитика",
+    "yourStats": "Ваша статистика",
+    "referrals": "Рефералов",
+    "earned": "Заработано",
+    "available": "Доступно",
+    "withdrawn": "Выплачено",
+    "commissionLevels": "Уровни комиссий",
+    "level": "Уровень",
+    "rate": "Ставка",
+    "structure": "Структура",
+    "ordersCount": "Заказов",
+    "loadError": "Ошибка загрузки MLM данных"
+  },
+  "reports": {
+    "title": "Отчеты",
+    "generateReport": "Сгенерировать отчет",
+    "ordersReport": "Отчет по заказам",
+    "mlmReport": "Отчет по MLM",
+    "financialReport": "Финансовый отчет",
+    "dateFrom": "С",
+    "dateTo": "По",
+    "status": "Статус",
+    "generating": "Генерация..."
+  },
+  "profile": {
+    "title": "Профиль",
+    "editProfile": "Редактирование профиля",
+    "changePassword": "Смена пароля",
+    "activityHistory": "История активности",
+    "currentPassword": "Текущий пароль",
+    "newPassword": "Новый пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "passwordChanged": "Пароль успешно изменен",
+    "profileUpdated": "Профиль успешно обновлен",
+    "passwordMismatch": "Пароли не совпадают"
+  },
+  "theme": {
+    "toggle": "Переключить тему",
+    "light": "Светлая",
+    "dark": "Темная"
+  },
+  "language": {
+    "toggle": "Переключить язык",
+    "russian": "Русский",
+    "english": "English"
+  }
+}
+
+
+

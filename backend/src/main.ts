@@ -75,6 +75,7 @@ async function bootstrap() {
       /^http:\/\/10\.0\.\d+\.\d+:\d+$/, // Internal network IPs (10.0.x.x)
       /^http:\/\/192\.168\.\d+\.\d+:\d+$/, // Local network IPs (192.168.x.x)
       /^http:\/\/46\.73\.\d+\.\d+:\d+$/, // External IP range (46.73.x.x)
+      /^http:\/\/212\.74\.\d+\.\d+:\d+$/, // External IP range (212.74.x.x) - Selectel
     ];
 
     app.enableCors({
